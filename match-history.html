@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Match History</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    .glow-yellow { box-shadow: 0 0 5px rgba(234, 179, 8, 0.5); }
+  </style>
+</head>
+<body class="bg-black text-white flex flex-col min-h-screen pb-16 relative">
+
+  <!-- Header -->
+  <header class="bg-black w-full max-w-md shadow-md py-2 px-3 mb-2 mx-auto border-b border-gray-600 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="bg-yellow-600 bg-opacity-50 border border-yellow-500 text-yellow-300 w-9 h-9 flex items-center justify-center font-bold rounded-full" style="font-family: 'Audiowide', cursive;">KD</div>
+      <h2 class="text-xl font-bold bg-gradient-to-r from-yellow-400 via-green-300 to-yellow-400 bg-clip-text text-transparent" style="font-family: 'Audiowide', cursive;">Khelo Dls</h2>
+    </div>
+    <div class="flex items-center gap-6 text-2xl text-gray-100">
+      <i class="fa-solid fa-headset font-bold text-1xl"></i>
+    </div>
+  </header>
+  <a href="dashboard.html" class="text-yellow-400 underline hover:text-yellow-300 mx-auto max-w-md block mb-4">Back To Dashboard</a>
+
+  <main id="matchHistory" class="space-y-6 px-3">
+    <p class="text-gray-400">Loading your match history...</p>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
+      authDomain: "dlstournament-31ac1.firebaseapp.com",
+      projectId: "dlstournament-31ac1",
+      storageBucket: "dlstournament-31ac1.appspot.com",
+      messagingSenderId: "874377019055",
+      appId: "1:874377019055:web:6e38db2ec7f0d541d2de5a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let currentUser = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return window.location.href = "login.html";
+      currentUser = user;
+      fetchMatchHistory();
+    });
+
+    async function fetchMatchHistory() {
+      const matchHistoryEl = document.getElementById("matchHistory");
+      matchHistoryEl.innerHTML = "Loading your match history...";
+      try {
+        const matchesSnapshot = await getDocs(collection(db, "matches"));
+        let html = "";
+        let found = false;
+
+        for (const docSnap of matchesSnapshot.docs) {
+          const matchId = docSnap.id;
+          const matchData = docSnap.data();
+
+          const participantRef = doc(db, "matches", matchId, "participants", currentUser.uid);
+          const participantSnap = await getDoc(participantRef);
+
+          if (participantSnap.exists()) {
+            found = true;
+            const pData = participantSnap.data();
+            const matchDate = matchData.dateTime?.toDate?.() || new Date(matchData.dateTime);
+            const formattedDate = matchDate.toLocaleString().replace(/GMT.*/, "").trim();
+
+            const participantsCol = collection(db, "matches", matchId, "participants");
+            const participantsSnapshot = await getDocs(participantsCol);
+            let participantsHtml = "<ul class='list-disc list-inside max-h-40 overflow-auto text-gray-300'>";
+            participantsSnapshot.forEach(docSnap => {
+              const participant = docSnap.data();
+              participantsHtml += `<li>${participant.teamName || "No Name"}</li>`;
+            });
+            participantsHtml += "</ul>";
+
+            const currentScreenshot = pData.screenshotUrl || "";
+
+            const hideUploadSection = currentScreenshot ? 'hidden' : '';
+
+            html += `
+              <div class="bg-gray-800 border border-gray-600 p-4 rounded-md">
+                <h4 class="text-yellow-400 font-semibold text-lg">${matchData.title || "Untitled Match"}</h4>
+                <p class="text-gray-300 text-sm">Date & Time: ${formattedDate}</p>
+                <p class="text-gray-300 text-sm">Your Team: <span class="font-bold text-yellow-400">${pData.teamName || "No Name"}</span></p>
+                <p class="text-gray-300 text-sm">Total Prize: ৳${matchData.totalPrice || 'N/A'}</p>
+                <p class="text-gray-300 text-sm">Per Goal: ৳${matchData.perGoal != null ? matchData.perGoal : 'N/A'}</p>
+                <p class="text-gray-300 text-sm">Entry Fee: ৳${matchData.entryFee || 'N/A'}</p>
+                <div class="mt-2">
+                  <h5 class="text-yellow-300 font-semibold">Participants:</h5>
+                  ${participantsHtml}
+                </div>
+
+                <div class="mt-4 screenshot-section ${hideUploadSection}" id="screenshot-section-${matchId}">
+                  <label for="screenshot-${matchId}" class="block text-gray-300 mb-1">Upload Match Screenshot URL:</label>
+                  <input
+                    type="url"
+                    id="screenshot-${matchId}"
+                    placeholder="Enter screenshot URL"
+                    class="w-full px-3 py-2 rounded bg-gray-900 text-white border border-gray-600 focus:outline-none focus:border-yellow-400"
+                    value="${currentScreenshot}"
+                  />
+                  <button
+                    onclick="uploadScreenshot('${matchId}')"
+                    class="mt-2 w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 rounded"
+                  >
+                    Upload Screenshot
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        matchHistoryEl.innerHTML = found
+          ? html
+          : `<p class="text-gray-400">You haven't joined any matches yet.</p>`;
+      } catch (error) {
+        console.error("Error fetching match history:", error);
+        matchHistoryEl.innerHTML = "<p class='text-red-500'>Failed to load match history.</p>";
+      }
+    }
+
+    window.uploadScreenshot = async function(matchId) {
+      const input = document.getElementById(`screenshot-${matchId}`);
+      const url = input.value.trim();
+
+      if (!url) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Empty URL',
+          text: 'Please enter a valid screenshot URL.',
+        });
+        return;
+      }
+
+      try {
+        const participantRef = doc(db, "matches", matchId, "participants", currentUser.uid);
+        await updateDoc(participantRef, { screenshotUrl: url });
+
+        // Hide the input section after successful upload
+        const section = document.getElementById(`screenshot-section-${matchId}`);
+        if (section) section.classList.add("hidden");
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Uploaded',
+          text: 'Screenshot URL uploaded successfully.',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } catch (error) {
+        console.error("Error uploading screenshot URL:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Upload Failed',
+          text: 'Failed to upload screenshot URL. Please try again.',
+        });
+      }
+    }
+  </script>
+</body>
+</html>
