@@ -43,6 +43,39 @@
       letter-spacing: 0.20em;
       font-family: 'Audiowide', cursive;
     }
+
+    .card-glow {
+      box-shadow:
+        0 0 15px rgba(251, 191, 36, 0.3),
+        0 0 25px rgba(251, 191, 36, 0.15);
+    }
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 12px rgba(234, 179, 8, 0.9);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(234, 179, 8, 1);
+      }
+    }
+    .pulse-glow {
+      animation: pulseGlow 2.5s ease-in-out infinite;
+    }
+
+    /* Slide Up Animation */
+    @keyframes slideUp {
+      0% {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0%);
+        opacity: 1;
+      }
+    }
+
+    .slide-up {
+      animation: slideUp 0.4s ease-out forwards;
+    }
   </style>
 </head>
 <body class="bg-black text-white flex flex-col min-h-screen pb-16 relative">
@@ -87,60 +120,59 @@
   </main>
 
   <!-- Join Popup Modal -->
-<div id="joinPopup" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
-  <div class="bg-gray-900 text-white rounded-xl overflow-hidden w-11/12 max-w-md border border-yellow-400 card-glow">
+  <div id="joinPopup" class="fixed inset-0 bg-black bg-opacity-60 flex items-end justify-center z-50 hidden">
+    <div class="bg-gray-900 text-white rounded-t-xl overflow-hidden w-full max-w-md card-glow slide-up">
 
-    <!-- Title Bar with Close Icon -->
-    <div class="w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black px-4 py-2 font-bold text-xl flex items-center justify-between header-glow" style="font-family: 'Audiowide', cursive;">
-      <span>Matches Joining</span>
-      <button onclick="closePopup()" class="w-8 h-8 rounded-full bg-black bg-opacity-20 text-white flex items-center justify-center text-xl hover:bg-yellow-400 hover:text-black transition">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-
-    <!-- Popup Content -->
-    <div class="p-5">
-
-      <!-- Beautified rules message -->
-      <div class="mb-5 flex items-center gap-3 bg-yellow-900 bg-opacity-20 rounded-lg p-3 border border-yellow-500 shadow-inner glow-yellow">
-        <i class="fa-solid fa-exclamation-triangle text-yellow-400 text-2xl"></i>
-        <p class="text-yellow-300 font-semibold text-md" style="font-family: 'Audiowide', cursive;">
-          জইন করার পূর্বে অবস্যই রুলস পড়ে নিবেন
-        </p>
-      </div>
-
-      <!-- Joining Entry Fee -->
-      <div class="mb-6">
-        <p class="text-yellow-400 font-semibold mb-2 tracking-wide uppercase text-center">Joining Entry Fee</p>
-        <div class="flex items-center gap-3 justify-center bg-yellow-900 bg-opacity-30 rounded-xl py-3 px-6 pulse-glow select-none">
-          <i class="fa-solid fa-bangladeshi-taka-sign text-yellow-400 text-3xl"></i>
-          <span id="popupEntryFee" class="text-yellow-300 text-4xl font-extrabold tracking-wide" style="font-family: 'Audiowide', cursive;">10</span>
-        </div>
-      </div>
-
-      <div class="mb-6">
-        <label for="teamName" class="block mb-2 font-semibold text-yellow-400">Team Name</label>
-        <input
-          id="teamName"
-          required
-          type="text"
-          placeholder="Enter your team name"
-          class="w-full px-4 py-3 rounded-xl bg-gray-800 border-2 border-yellow-500 text-yellow-300 placeholder-yellow-500 font-semibold focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 transition duration-300 shadow-lg"
-        />
-      </div>
-
-      <!-- Join Match Button -->
-      <div class="flex justify-center">
-        <button
-          onclick="joinmtch()"
-          class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:from-green-500 hover:via-green-600 hover:to-green-700 text-white px-8 py-3 rounded-3xl font-extrabold tracking-wide shadow-lg transition duration-300 transform hover:scale-105 active:scale-95"
-        >
-          Join Match
+      <!-- Title Bar -->
+      <div class="w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black px-4 py-2 font-bold text-xl flex items-center justify-between header-glow" style="font-family: 'Audiowide', cursive;">
+        <span>Matches Joining</span>
+        <button onclick="closePopup()" class="w-8 h-8 rounded-full bg-black bg-opacity-20 text-white flex items-center justify-center text-xl hover:bg-yellow-400 hover:text-black transition">
+          <i class="fa-solid fa-xmark"></i>
         </button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-5">
+        <!-- Rules -->
+        <div class="mb-5 flex items-center gap-3 bg-yellow-900 bg-opacity-20 rounded-lg p-2 border border-yellow-500 shadow-inner glow-yellow">
+          <i class="fa-solid fa-exclamation-triangle text-yellow-400 text-2xl"></i>
+          <p class="text-yellow-300 font-semibold text-sm" style="font-family: 'Audiowide', cursive;">
+            জইন করার পূর্বে অবস্যই রুলস পড়ে নিবেন
+          </p>
+        </div>
+
+        <!-- Entry Fee -->
+        <div class="mb-6">
+          <p class="text-yellow-400 font-semibold mb-2 tracking-wide uppercase text-center">Joining Entry Fee</p>
+          <div class="flex items-center gap-1 justify-center bg-yellow-900 bg-opacity-30 rounded-xl py-1 px-3 pulse-glow select-none">
+            <i class="fa-solid fa-bangladeshi-taka-sign text-yellow-400 text-2xl"></i>
+            <span id="popupEntryFee" class="text-yellow-300 text-2xl font-extrabold tracking-wide" style="font-family: 'Audiowide', cursive;">0.00</span>
+          </div>
+        </div>
+
+        <!-- Team Name -->
+        <div class="mb-6">
+          <input
+            id="teamName"
+            required
+            type="text"
+            placeholder="Enter your team name"
+            class="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-yellow-500 text-yellow-300 placeholder-yellow-500 font-semibold focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 transition duration-300 shadow-lg"
+          />
+        </div>
+
+        <!-- Join Button -->
+        <div class="flex justify-center">
+          <button
+            onclick="joinmtch()"
+            class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:from-green-500 hover:via-green-600 hover:to-green-700 text-white px-8 py-3 rounded-lg font-extrabold tracking-wide shadow-lg transition duration-300 transform hover:scale-105 active:scale-95"
+          >
+            Join Match
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
    
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
