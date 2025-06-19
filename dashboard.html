@@ -86,6 +86,62 @@
     </section>
   </main>
 
+  <!-- Join Popup Modal -->
+<div id="joinPopup" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+  <div class="bg-gray-900 text-white rounded-xl overflow-hidden w-11/12 max-w-md border border-yellow-400 card-glow">
+
+    <!-- Title Bar with Close Icon -->
+    <div class="w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black px-4 py-2 font-bold text-xl flex items-center justify-between header-glow" style="font-family: 'Audiowide', cursive;">
+      <span>Matches Joining</span>
+      <button onclick="closePopup()" class="w-8 h-8 rounded-full bg-black bg-opacity-20 text-white flex items-center justify-center text-xl hover:bg-yellow-400 hover:text-black transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Popup Content -->
+    <div class="p-5">
+
+      <!-- Beautified rules message -->
+      <div class="mb-5 flex items-center gap-3 bg-yellow-900 bg-opacity-20 rounded-lg p-3 border border-yellow-500 shadow-inner glow-yellow">
+        <i class="fa-solid fa-exclamation-triangle text-yellow-400 text-2xl"></i>
+        <p class="text-yellow-300 font-semibold text-md" style="font-family: 'Audiowide', cursive;">
+          জইন করার পূর্বে অবস্যই রুলস পড়ে নিবেন
+        </p>
+      </div>
+
+      <!-- Joining Entry Fee -->
+      <div class="mb-6">
+        <p class="text-yellow-400 font-semibold mb-2 tracking-wide uppercase text-center">Joining Entry Fee</p>
+        <div class="flex items-center gap-3 justify-center bg-yellow-900 bg-opacity-30 rounded-xl py-3 px-6 pulse-glow select-none">
+          <i class="fa-solid fa-bangladeshi-taka-sign text-yellow-400 text-3xl"></i>
+          <span class="text-yellow-300 text-4xl font-extrabold tracking-wide" style="font-family: 'Audiowide', cursive;">10</span>
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <label for="teamName" class="block mb-2 font-semibold text-yellow-400">Team Name</label>
+        <input
+          id="teamName"
+          required
+          type="text"
+          placeholder="Enter your team name"
+          class="w-full px-4 py-3 rounded-xl bg-gray-800 border-2 border-yellow-500 text-yellow-300 placeholder-yellow-500 font-semibold focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 transition duration-300 shadow-lg"
+        />
+      </div>
+
+      <!-- Join Match Button -->
+      <div class="flex justify-center">
+        <button
+          onclick="joinmtch()"
+          class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:from-green-500 hover:via-green-600 hover:to-green-700 text-white px-8 py-3 rounded-3xl font-extrabold tracking-wide shadow-lg transition duration-300 transform hover:scale-105 active:scale-95"
+        >
+          Join Match
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
    
    <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -106,6 +162,12 @@
   const db = getFirestore(app);
   let currentUser = null;
   let userBalance = 0;
+
+  // Variables to hold current match info for joining from popup
+  let joinMatchId = null;
+  let joinCurrentSlot = 0;
+  let joinSlotLimit = 0;
+  let joinEntryFee = 0;
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) return window.location.href = "login.html";
@@ -279,32 +341,6 @@
 
   window.showTeamInput = async (matchId, currentSlot, slotLimit, entryFee) => {
     if (!currentUser) return;
-    const userId = currentUser.uid;
-    const participantRef = doc(db, "matches", matchId, "participants", userId);
-    const participantSnap = await getDoc(participantRef);
-
-    if (participantSnap.exists()) {
-      Swal.fire("Already Joined", "You have already joined this match.", "info");
-      return;
-    }
-
-    const { value: teamName } = await Swal.fire({
-      title: "Enter Team Name",
-      input: "text",
-      inputLabel: "Team Name",
-      inputPlaceholder: "Type your team name here",
-      confirmButtonText: "Join Match",
-      showCancelButton: true,
-      inputValidator: (value) => !value && "Team name is required!"
-    });
-
-    if (teamName) {
-      joinMatch(matchId, currentSlot, slotLimit, entryFee, teamName);
-    }
-  };
-
-  async function joinMatch(matchId, currentSlot, slotLimit, entryFee, teamName) {
-    if (!currentUser) return;
 
     const userId = currentUser.uid;
     const participantRef = doc(db, "matches", matchId, "participants", userId);
@@ -320,30 +356,80 @@
       return;
     }
 
-    if (userBalance < entryFee) {
+    // Save match details for join
+    joinMatchId = matchId;
+    joinCurrentSlot = currentSlot;
+    joinSlotLimit = slotLimit;
+    joinEntryFee = entryFee;
+
+    // Show the custom popup modal
+    document.getElementById("joinPopup").classList.remove("hidden");
+    document.getElementById("teamName").value = "";
+    document.getElementById("teamName").focus();
+  };
+
+  window.closePopup = () => {
+    document.getElementById("joinPopup").classList.add("hidden");
+  };
+
+  window.joinmtch = async () => {
+    if (!currentUser) return;
+
+    const teamNameInput = document.getElementById("teamName");
+    const teamName = teamNameInput.value.trim();
+
+    if (!teamName) {
+      Swal.fire("Team Name Required", "Please enter your team name.", "warning");
+      return;
+    }
+
+    const userId = currentUser.uid;
+    const participantRef = doc(db, "matches", joinMatchId, "participants", userId);
+    const participantSnap = await getDoc(participantRef);
+
+    if (participantSnap.exists()) {
+      Swal.fire("Already Joined", "You have already joined this match.", "info");
+      closePopup();
+      return;
+    }
+
+    if (joinCurrentSlot >= joinSlotLimit) {
+      Swal.fire("Slot Full", "Sorry, this match is already full.", "warning");
+      closePopup();
+      return;
+    }
+
+    if (userBalance < joinEntryFee) {
       Swal.fire("Insufficient Balance", "You don't have enough balance to join this match.", "error");
       return;
     }
 
     try {
-      await updateDoc(doc(db, "users", userId), { balance: userBalance - entryFee });
+      // Deduct entry fee from user's balance in Firestore and local variable
+      await updateDoc(doc(db, "users", userId), { balance: userBalance - joinEntryFee });
+
+      // Add participant document
       await setDoc(participantRef, {
         joinedAt: new Date(),
         uid: userId,
         teamName: teamName
       });
-      await updateDoc(doc(db, "matches", matchId), { slot: increment(1) });
 
-      userBalance -= entryFee;
+      // Increment slot count on match document
+      await updateDoc(doc(db, "matches", joinMatchId), { slot: increment(1) });
+
+      userBalance -= joinEntryFee;
       document.getElementById("mainBalance").innerText = `৳${userBalance.toFixed(2)}`;
 
       Swal.fire("Joined!", "You have successfully joined the match.", "success");
+
+      closePopup();
       fetchMatches();
     } catch (error) {
       console.error("Join match error:", error);
       Swal.fire("Error", "Failed to join the match.", "error");
     }
-  }
+  };
 
   window.showMatchCode = async (matchId) => {
     if (!currentUser) return;
