@@ -114,7 +114,7 @@
         <p class="text-yellow-400 font-semibold mb-2 tracking-wide uppercase text-center">Joining Entry Fee</p>
         <div class="flex items-center gap-3 justify-center bg-yellow-900 bg-opacity-30 rounded-xl py-3 px-6 pulse-glow select-none">
           <i class="fa-solid fa-bangladeshi-taka-sign text-yellow-400 text-3xl"></i>
-          <span class="text-yellow-300 text-4xl font-extrabold tracking-wide" style="font-family: 'Audiowide', cursive;">10</span>
+          <span id="popupEntryFee" class="text-yellow-300 text-4xl font-extrabold tracking-wide" style="font-family: 'Audiowide', cursive;">0.00</span>
         </div>
       </div>
 
@@ -143,7 +143,7 @@
 </div>
 
    
-   <script type="module">
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, collection, getDocs, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -163,7 +163,7 @@
   let currentUser = null;
   let userBalance = 0;
 
-  // Variables to hold current match info for joining from popup
+  // Temp values for joining
   let joinMatchId = null;
   let joinCurrentSlot = 0;
   let joinSlotLimit = 0;
@@ -220,9 +220,6 @@
         const team1 = participants[0] || { teamName: "Team 1", imageUrl: "images (1).jpeg" };
         const team2 = participants[1] || { teamName: "Team 2", imageUrl: "images (2).jpeg" };
 
-        const team1Image = team1.imageUrl || "images (1).jpeg";
-        const team2Image = team2.imageUrl || "images (2).jpeg";
-
         timers.push({ id: `countdown-${matchId}`, time: matchDate });
 
         html += `
@@ -238,12 +235,12 @@
 
             <div class="grid grid-cols-3 items-center text-center">
               <div class="flex flex-col items-center gap-1">
-                <img src="${team1Image}" class="w-8 h-8 rounded-full border border-white shadow-md" alt="${team1.teamName}" />
+                <img src="${team1.imageUrl}" class="w-8 h-8 rounded-full border border-white shadow-md" alt="${team1.teamName}" />
                 <span class="text-xs font-bold">${team1.teamName}</span>
               </div>
               <span class="text-yellow-400 font-black text-lg">VS</span>
               <div class="flex flex-col items-center gap-1">
-                <img src="${team2Image}" class="w-8 h-8 rounded-full border border-white shadow-md" alt="${team2.teamName}" />
+                <img src="${team2.imageUrl}" class="w-8 h-8 rounded-full border border-white shadow-md" alt="${team2.teamName}" />
                 <span class="text-xs font-bold">${team2.teamName}</span>
               </div>
             </div>
@@ -320,19 +317,19 @@
         const seconds = Math.floor((distance / 1000) % 60);
 
         el.innerHTML = `
-  <div class="countdown-segment">
-    <span class="countdown-number">${hours}</span>
-    <span class="countdown-label">Hrs</span>
-  </div>
-  <div class="countdown-segment">
-    <span class="countdown-number">${minutes}</span>
-    <span class="countdown-label">Min</span>
-  </div>
-  <div class="countdown-segment">
-    <span class="countdown-number">${seconds}</span>
-    <span class="countdown-label">Sec</span>
-  </div>
-`;
+          <div class="countdown-segment">
+            <span class="countdown-number">${hours}</span>
+            <span class="countdown-label">Hrs</span>
+          </div>
+          <div class="countdown-segment">
+            <span class="countdown-number">${minutes}</span>
+            <span class="countdown-label">Min</span>
+          </div>
+          <div class="countdown-segment">
+            <span class="countdown-number">${seconds}</span>
+            <span class="countdown-label">Sec</span>
+          </div>
+        `;
       });
     }
     update();
@@ -356,30 +353,22 @@
       return;
     }
 
-    // Save match details for join
     joinMatchId = matchId;
     joinCurrentSlot = currentSlot;
     joinSlotLimit = slotLimit;
     joinEntryFee = entryFee;
 
-    // Show the custom popup modal
-    document.getElementById("joinPopup").classList.remove("hidden");
+    // Show updated fee in popup
+    document.getElementById("popupEntryFee").innerText = `৳${entryFee}`;
     document.getElementById("teamName").value = "";
+    document.getElementById("joinPopup").classList.remove("hidden");
     document.getElementById("teamName").focus();
   };
 
-  window.closePopup = () => {
-    document.getElementById("joinPopup").classList.add("hidden");
-  };
-
   window.joinmtch = async () => {
-    if (!currentUser) return;
-
-    const teamNameInput = document.getElementById("teamName");
-    const teamName = teamNameInput.value.trim();
-
+    const teamName = document.getElementById("teamName").value.trim();
     if (!teamName) {
-      Swal.fire("Team Name Required", "Please enter your team name.", "warning");
+      Swal.fire("Required", "Please enter your team name.", "warning");
       return;
     }
 
@@ -394,71 +383,67 @@
     }
 
     if (joinCurrentSlot >= joinSlotLimit) {
-      Swal.fire("Slot Full", "Sorry, this match is already full.", "warning");
+      Swal.fire("Slot Full", "This match is already full.", "warning");
       closePopup();
       return;
     }
 
     if (userBalance < joinEntryFee) {
-      Swal.fire("Insufficient Balance", "You don't have enough balance to join this match.", "error");
+      Swal.fire("Low Balance", "You don't have enough balance to join.", "error");
       return;
     }
 
     try {
-      // Deduct entry fee from user's balance in Firestore and local variable
       await updateDoc(doc(db, "users", userId), { balance: userBalance - joinEntryFee });
-
-      // Add participant document
       await setDoc(participantRef, {
         joinedAt: new Date(),
         uid: userId,
         teamName: teamName
       });
-
-      // Increment slot count on match document
       await updateDoc(doc(db, "matches", joinMatchId), { slot: increment(1) });
 
       userBalance -= joinEntryFee;
       document.getElementById("mainBalance").innerText = `৳${userBalance.toFixed(2)}`;
 
-      Swal.fire("Joined!", "You have successfully joined the match.", "success");
-
+      Swal.fire("Joined", "You successfully joined the match!", "success");
       closePopup();
       fetchMatches();
     } catch (error) {
-      console.error("Join match error:", error);
-      Swal.fire("Error", "Failed to join the match.", "error");
+      console.error("Join error:", error);
+      Swal.fire("Error", "Something went wrong joining the match.", "error");
     }
   };
 
-  window.showMatchCode = async (matchId) => {
-    if (!currentUser) return;
+  window.closePopup = () => {
+    document.getElementById("joinPopup").classList.add("hidden");
+  };
 
-    const userId = currentUser.uid;
+  window.showMatchCode = async (matchId) => {
+    const userId = currentUser?.uid;
     const matchRef = doc(db, "matches", matchId);
     const matchSnap = await getDoc(matchRef);
+
     if (!matchSnap.exists()) return;
 
-    const matchData = matchSnap.data();
-    const matchDate = matchData.dateTime?.toDate?.() || new Date(matchData.dateTime);
-    const timeDiff = matchDate.getTime() - Date.now();
+    const match = matchSnap.data();
+    const startTime = match.dateTime?.toDate?.() || new Date(match.dateTime);
+    const timeDiff = startTime.getTime() - Date.now();
 
     const participantRef = doc(db, "matches", matchId, "participants", userId);
     const participantSnap = await getDoc(participantRef);
-
     if (!participantSnap.exists()) {
-      Swal.fire("Access Denied", "You need to join the match to see the match code.", "warning");
+      Swal.fire("Access Denied", "You must join the match to see the code.", "warning");
       return;
     }
 
     if (timeDiff > 2 * 60 * 1000) {
-      Swal.fire("Not Available Yet", "Match code will be available 2 minutes before start.", "info");
+      Swal.fire("Not Yet", "Code will be available 2 minutes before match starts.", "info");
       return;
     }
 
     Swal.fire({
-      title: `Match Code`,
-      html: `<p class="text-yellow-400 font-bold text-lg">${matchData.matchCode || "N/A"}</p>`,
+      title: "Match Code",
+      html: `<p class="text-yellow-400 font-bold text-lg">${match.matchCode || "N/A"}</p>`,
       icon: "info",
       confirmButtonText: "Close"
     });
