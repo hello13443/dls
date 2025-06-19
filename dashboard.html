@@ -170,7 +170,6 @@
                 <h4 style="font-size: 13.5px;" class="font-extrabold text-gray-100 tracking-wide uppercase">${match.title || "Untitled"}</h4>
               </div>
               <div id="countdown-${matchId}" class="flex justify-center text-yellow-300 text-xs font-mono font-bold gap-2" aria-label="Match countdown timer" role="timer">
-                
               </div>
             </div>
 
@@ -249,9 +248,7 @@
         const distance = new Date(timer.time).getTime() - now;
 
         if (distance <= 0) {
-          el.innerHTML = `<span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-ping-slow border border-white shadow-md">
-            LIVE
-          </span>`;
+          el.innerHTML = `<span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-ping-slow border border-white shadow-md">LIVE</span>`;
           return;
         }
 
@@ -261,19 +258,18 @@
 
         el.innerHTML = `
   <div class="countdown-segment">
-    <span class="countdown-number">${String(hours).padStart(2, "0")}</span>
+    <span class="countdown-number">${hours}</span>
     <span class="countdown-label">Hrs</span>
   </div>
   <div class="countdown-segment">
-    <span class="countdown-number">${String(minutes).padStart(2, "0")}</span>
+    <span class="countdown-number">${minutes}</span>
     <span class="countdown-label">Min</span>
   </div>
   <div class="countdown-segment">
-    <span class="countdown-number">${String(seconds).padStart(2, "0")}</span>
+    <span class="countdown-number">${seconds}</span>
     <span class="countdown-label">Sec</span>
   </div>
 `;
-
       });
     }
     update();
@@ -385,6 +381,6 @@
     await signOut(auth);
     window.location.href = "login.html";
   };
-    </script>
+      </script>
  </body>
 </html>
