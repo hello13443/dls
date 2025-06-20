@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dls Tournament</title>
+  <title>Profile</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -16,17 +16,37 @@
     .swal2-timer-progress-bar { background: #facc15 !important; }
     .glow-yellow { box-shadow: 0 0 8px rgba(234, 179, 8, 0.6); }
     .header-glow { box-shadow: 0 0 10px rgba(255, 255, 255, 0.1), 0 0 15px rgba(251, 191, 36, 0.3); }
+    .loader {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 6px solid rgba(255, 255, 255, 0.15);
+      border-top-color: #facc15;
+      animation: spin 2s ease-in-out infinite;
+      box-shadow: 0 0 8px #facc15, inset 0 0 8px #facc15;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="bg-black text-white">
 
-  <!-- Header Section -->
+  <!-- Loader -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-black flex items-center justify-center z-50">
+    <div class="text-center">
+      <div class="loader mx-auto mb-4"></div>
+      <h1 class="text-2xl font-bold animate-pulse bg-gradient-to-r from-yellow-400 via-green-300 to-yellow-400 bg-clip-text text-transparent" style="font-family: 'Audiowide', cursive;">Loading...</h1>
+    </div>
+  </div>
+
+  <!-- Header -->
   <header class="bg-gradient-to-r from-black via-gray-900 to-black w-full max-w-md shadow-md py-2 px-3 mb-3 mx-auto border-b border-gray-700 flex items-center justify-between header-glow rounded-b-xl">
     <div class="flex items-center gap-2">
       <div class="bg-yellow-600 bg-opacity-50 border border-yellow-500 text-yellow-300 w-9 h-9 flex items-center justify-center font-bold rounded-full shadow" style="font-family: 'Audiowide', cursive;">KD</div>
       <h2 class="text-2xl font-bold bg-gradient-to-r from-yellow-400 via-green-300 to-yellow-400 bg-clip-text text-transparent" style="font-family: 'Audiowide', cursive;">Khelo Dls</h2>
     </div>
-    <div style="height: 29px;" class="flex items-center gap-1 bg-gradient-to-br from-yellow-500 via-yellow-700 to-yellow-500 text-black px-1 py-1 rounded-full shadow-lg border border-yellow-200">
+    <div class="flex items-center gap-1 bg-gradient-to-br from-yellow-500 via-yellow-700 to-yellow-500 text-black px-1 py-1 rounded-full shadow-lg border border-yellow-200">
       <div class="w-6 h-6 rounded-full bg-black bg-opacity-20 flex items-center justify-center">
         <i class="fa-solid fa-bangladeshi-taka-sign text-white text-sm"></i>
       </div>
@@ -37,10 +57,9 @@
     </div>
   </header>
 
-  <!-- Main Section -->
+  <!-- Main Content -->
   <main class="px-3 max-w-md mx-auto w-full space-y-6 pb-24">
-
-    <!-- Profile Section -->
+    <!-- Profile Info -->
     <section class="bg-gray-900 bg-opacity-50 border border-gray-700 rounded-xl p-3 flex items-center gap-4 card-glow">
       <div class="w-14 h-14 rounded-full bg-yellow-500 bg-opacity-20 flex items-center justify-center border-2 border-yellow-400 shadow-inner">
         <i class="fa-solid fa-user text-2xl text-yellow-300"></i>
@@ -51,7 +70,7 @@
       </div>
     </section>
 
-    <!-- Refer Section -->
+    <!-- Referral -->
     <section class="bg-gray-900 bg-opacity-50 border border-gray-700 rounded-xl p-1 px-3 space-y-2 text-center">
       <div>
         <h4 class="text-yellow-400 font-semibold text-base">Your Refer Link</h4>
@@ -68,7 +87,7 @@
       </div>
     </section>
 
-    <!-- Deposit & Withdraw Buttons -->
+    <!-- Actions -->
     <section class="bg-gray-900 bg-opacity-50 border border-gray-700 rounded-xl p-4 flex justify-between items-center gap-4">
       <a href="deposit.html" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg flex items-center justify-center gap-2 shadow-md">
         <i class="fa-solid fa-circle-down"></i> Deposit
@@ -78,25 +97,21 @@
       </a>
     </section>
 
-    <!-- More Options Section -->
+    <!-- More Options -->
     <section class="bg-gray-900 bg-opacity-50 border border-gray-700 rounded-xl p-4 space-y-3">
       <h4 class="text-yellow-400 text-center font-semibold text-base mb-2">More Options</h4>
-
       <a href="support.html" class="flex items-center justify-between bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 text-yellow-300">
         <span><i class="fa-solid fa-headset mr-2"></i>Support</span>
         <i class="fa-solid fa-angle-right"></i>
       </a>
-
       <a href="deposit-history.html" class="flex items-center justify-between bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 text-yellow-300">
         <span><i class="fa-solid fa-wallet mr-2"></i>Deposit History</span>
         <i class="fa-solid fa-angle-right"></i>
       </a>
-
       <a href="withdraw-history.html" class="flex items-center justify-between bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 text-yellow-300">
         <span><i class="fa-solid fa-money-bill-transfer mr-2"></i>Withdraw History</span>
         <i class="fa-solid fa-angle-right"></i>
       </a>
-
       <div class="w-full flex justify-center mt-4">
         <button onclick="logout()" class="w-1/2 text-center bg-red-600 hover:bg-red-700 rounded-lg px-4 py-2 text-white flex items-center justify-center">
           <i class="fa-solid fa-right-from-bracket mr-2"></i> Logout
@@ -105,34 +120,28 @@
     </section>
   </main>
 
-  <!-- Bottom Navigation Bar -->
+  <!-- Bottom Nav -->
   <nav class="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-700 flex justify-around items-center py-2 rounded-t-2xl shadow-inner text-white h-16 z-10">
     <a href="dashboard.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
         <i class="fa-solid fa-gamepad text-lg text-gray-300 hover:text-yellow-400"></i>
       </div>
       Home
     </a>
     <a href="league.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
         <i class="fa-solid fa-trophy text-lg text-gray-300 hover:text-yellow-400"></i>
       </div>
       Winner
     </a>
-    <a href="league.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
-        <i class="fa-solid fa-futbol text-lg text-gray-300 hover:text-yellow-400"></i>
-      </div>
-      League
-    </a>
     <a href="match-history.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
         <i class="fa-solid fa-clock-rotate-left text-lg text-gray-300 hover:text-yellow-400"></i>
       </div>
       History
     </a>
     <a href="profile.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-400">
+      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-400">
         <i class="fa-solid fa-user text-lg text-gray-400 hover:text-yellow-400"></i>
       </div>
       Profile
@@ -143,7 +152,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
@@ -156,20 +164,18 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
-    onAuthStateChanged(auth, async (user) => {
+    function hideLoader() {
+      const loader = document.getElementById('loadingOverlay');
+      if (loader) loader.style.display = 'none';
+    }
+
+    onAuthStateChanged(auth, (user) => {
       if (!user) return window.location.href = "login.html";
-
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        document.getElementById("username").innerText = data.username || "No username";
-        document.getElementById("email").innerText = data.email || user.email;
-        document.getElementById("mainBalance").innerText = parseInt(data.balance) || 0;
-        document.getElementById("totalRefers").innerText = data.totalRefers || 0;
-        document.getElementById("referLink").value = `https://khelodls.com/ref/${user.uid}`;
-      }
+      const currentDomain = window.location.origin;
+      const referralLink = `${currentDomain}/signup.html?ref=${user.uid}`;
+      document.getElementById("referLink").value = referralLink;
+      hideLoader();
     });
 
     window.logout = async () => {
@@ -179,9 +185,18 @@
 
     window.copyReferLink = () => {
       const input = document.getElementById("referLink");
-      input.select();
       navigator.clipboard.writeText(input.value).then(() => {
-        Swal.fire("Copied!", "Referral link copied!", "success");
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Referral link copied!',
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+          background: '#1a202c',
+          color: '#fff'
+        });
       });
     };
   </script>
