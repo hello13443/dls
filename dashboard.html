@@ -77,17 +77,20 @@
 </head>
 <body class="bg-black text-white flex flex-col min-h-screen pb-16 relative">
 
-  <!-- Header -->
-  <header class="bg-black w-full max-w-md shadow-md py-2 px-3 mb-2 mx-auto border-b border-gray-600 flex items-center justify-between">
+  <!-- Header Section -->
+  <header class="bg-gradient-to-r from-black via-gray-900 to-black w-full max-w-md shadow-md py-2 px-3 mb-3 mx-auto border-b border-gray-700 flex items-center justify-between header-glow rounded-b-xl">
     <div class="flex items-center gap-2">
-      <div class="bg-yellow-600 bg-opacity-50 border border-yellow-500 text-yellow-300 w-9 h-9 flex items-center justify-center font-bold rounded-full" style="font-family: 'Audiowide', cursive;">KD</div>
-      <h2 class="text-xl font-bold bg-gradient-to-r from-yellow-400 via-green-300 to-yellow-400 bg-clip-text text-transparent" style="font-family: 'Audiowide', cursive;">Khelo Dls</h2>
+      <div class="bg-yellow-600 bg-opacity-50 border border-yellow-500 text-yellow-300 w-10 h-10 flex items-center justify-center font-bold rounded-full shadow" style="font-family: 'Audiowide', cursive;">KD</div>
+      <h2 class="text-2xl font-bold bg-gradient-to-r from-yellow-400 via-green-300 to-yellow-400 bg-clip-text text-transparent" style="font-family: 'Audiowide', cursive;">Khelo Dls</h2>
     </div>
-    <div class="flex items-center gap-6 text-2xl text-gray-100">
-      <i class="fa-solid fa-headset font-bold text-1xl"></i>
-      <div onclick="logout()" class="bg-gray-900 w-10 h-8 hover:border-purple-500 flex items-center justify-center rounded-sm border border-gray-700 cursor-pointer">
-        <i class="fa-solid fa-right-from-bracket"></i>
+    <div class="flex items-center gap-1 bg-gradient-to-br from-yellow-400 via-yellow-600 to-yellow-400 text-black px-1 py-1 rounded-full shadow-lg border border-yellow-200">
+      <div class="w-6 h-6 rounded-full bg-black bg-opacity-20 flex items-center justify-center">
+        <i class="fa-solid fa-bangladeshi-taka-sign text-white text-sm"></i>
       </div>
+      <p id="mainBalance" style="font-family: 'Audiowide', cursive;" class="text-sm font-bold text-white">10.00</p>
+      <button class="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-md">
+        <i class="fa-solid fa-plus text-black text-sm"></i>
+      </button>
     </div>
   </header>
 
@@ -190,20 +193,7 @@
   <!-- Main Content -->
   <main class="px-3 max-w-md mx-auto w-full">
     <p id="userName" class="text-lg font-semibold"></p>
-
-    <!-- Balance -->
-    <div class="bg-black rounded-md p-4 flex items-center justify-between border border-gray-700 glow-yellow">
-      <div class="text-white">
-        <h2 class="text-sm font-semibold">Balance</h2>
-        <p id="mainBalance" class="text-xl text-yellow-400 font-bold mt-1 flex items-center">
-          <i class="fa-solid fa-bangladeshi-taka-sign mr-1"></i>0.00
-        </p>
-      </div>
-      <a href="#">
-        <button class="bg-yellow-300 text-black text-sm font-semibold px-5 py-1.5 rounded-full shadow-6xl">Finance</button>
-      </a>
-    </div>
-
+    
     <!-- Match List -->
     <section>
       <h3 class="text-xl font-bold mb-3 border-b border-yellow-400 pb-1">Upcoming Matches</h3>
@@ -241,11 +231,11 @@
     History
   </a>
 
-  <a href="profile.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+  <a onclick="logout()" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
     <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-400">
       <i class="fa-solid fa-user text-lg text-gray-400 hover:text-yellow-400"></i>
     </div> 
-    Profile
+    Logout
   </a>
   </nav>
 
