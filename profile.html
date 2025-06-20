@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -153,7 +152,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
@@ -187,8 +186,12 @@
         const userData = userSnap.data();
         document.getElementById("username").textContent = userData.username || "No Name";
         document.getElementById("mainBalance").textContent = userData.balance ?? 0;
-        document.getElementById("totalRefers").textContent = userData.refers ?? 0;
       }
+
+      // Calculate total referrals
+      const q = query(collection(db, "users"), where("referredBy", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+      document.getElementById("totalRefers").textContent = querySnapshot.size;
 
       hideLoader();
     });
