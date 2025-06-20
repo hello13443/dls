@@ -73,32 +73,6 @@
     .slide-up {
       animation: slideUp 0.4s ease-out forwards;
     }
-
-    /* New LIVE animation */
-    @keyframes livePulseGlow {
-      0% {
-        transform: scale(1);
-        color: #fbbf24;
-        opacity: 1;
-      }
-      50% {
-        transform: scale(1.15);
-        color: #fffbdb;
-        opacity: 0.85;
-      }
-      100% {
-        transform: scale(1);
-        color: #fbbf24;
-        opacity: 1;
-      }
-    }
-
-    .live-badge {
-      animation: livePulseGlow 5.5s ease-in-out infinite;
-      font-weight: 900;
-      letter-spacing: 0.06em;
-      user-select: none;
-    }
   </style>
 </head>
 <body class="bg-black text-white flex flex-col min-h-screen pb-16 relative">
@@ -109,7 +83,7 @@
       <div class="bg-yellow-600 bg-opacity-50 border border-yellow-500 text-yellow-300 w-10 h-10 flex items-center justify-center font-bold rounded-full shadow" style="font-family: 'Audiowide', cursive;">KD</div>
       <h2 class="text-2xl font-bold bg-gradient-to-r from-yellow-400 via-green-300 to-yellow-400 bg-clip-text text-transparent" style="font-family: 'Audiowide', cursive;">Khelo Dls</h2>
     </div>
-    <div class="flex items-center gap-1 bg-gradient-to-br from-yellow-400 via-yellow-600 to-yellow-400 text-black px-1 py-0.5 rounded-full shadow-lg border border-yellow-200">
+    <div class="flex items-center gap-1 bg-gradient-to-br from-yellow-500 via-yellow-700 to-yellow-500 text-black px-1 py-0.5 rounded-full shadow-lg border border-yellow-200">
       <div class="w-6 h-6 rounded-full bg-black bg-opacity-20 flex items-center justify-center">
         <i class="fa-solid fa-bangladeshi-taka-sign text-white text-sm"></i>
       </div>
@@ -230,7 +204,7 @@
           All Matches
         </h3>
       </div>
-      <div id="matchList"></div>
+      <div id="matchList" class="mt-4"></div>
     </section>
   </main>
 
