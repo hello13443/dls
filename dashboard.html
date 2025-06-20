@@ -397,6 +397,7 @@
     }
   }
 
+  // countdown timer ফাংশন: leading zero ছাড়া, যেমন 1:5:9
   function startCountdowns(timers) {
     function update() {
       const now = new Date().getTime();
@@ -414,10 +415,11 @@
         const minutes = Math.floor((distance / (1000 * 60)) % 60);
         const seconds = Math.floor((distance / 1000) % 60);
 
+        // এখানে কোনো leading zero নাই, সরাসরি সংখ্যা দেখাবে
         el.innerHTML = `
-          <div class="countdown-segment"><span class="countdown-number">${String(hours).padStart(2, "0")}</span><span class="countdown-label">Hrs</span></div>
-          <div class="countdown-segment"><span class="countdown-number">${String(minutes).padStart(2, "0")}</span><span class="countdown-label">Min</span></div>
-          <div class="countdown-segment"><span class="countdown-number">${String(seconds).padStart(2, "0")}</span><span class="countdown-label">Sec</span></div>
+          <div class="countdown-segment"><span class="countdown-number">${hours}</span><span class="countdown-label">Hrs</span></div>
+          <div class="countdown-segment"><span class="countdown-number">${minutes}</span><span class="countdown-label">Min</span></div>
+          <div class="countdown-segment"><span class="countdown-number">${seconds}</span><span class="countdown-label">Sec</span></div>
         `;
       });
     }
@@ -531,6 +533,6 @@
     await signOut(auth);
     window.location.href = "login.html";
   };
-   </script>
+</script>
  </body>
 </html>
