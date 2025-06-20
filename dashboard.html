@@ -146,47 +146,6 @@
     </div>
   </div>
 
-  <!-- Match Code Popup Modal -->
-  <div id="matchcodePopup" class="fixed inset-0 bg-black bg-opacity-60 flex items-end justify-center z-50 hidden">
-    <div id="popupContent" class="bg-gray-900 text-white rounded-t-xl overflow-hidden w-full max-w-md card-glow mb-16">
-
-      <!-- Title Bar -->
-      <div class="w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black px-4 py-2 font-bold text-xl flex items-center justify-between header-glow" style="font-family: 'Audiowide', cursive;">
-        <span>Matches Code</span>
-        <button onclick="closePopup()" class="w-8 h-8 rounded-full bg-black bg-opacity-20 text-white flex items-center justify-center text-xl hover:bg-yellow-400 hover:text-black transition">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <!-- Content -->
-      <div class="p-5">
-        <!-- Rules -->
-        <div class="mb-5 flex items-center gap-3 bg-yellow-900 bg-opacity-20 rounded-lg p-2 border border-yellow-500 shadow-inner glow-yellow">
-          <i class="fa-solid fa-exclamation-triangle text-yellow-400 text-2xl"></i>
-          <p class="text-yellow-300 font-semibold text-md" style="font-family: 'Audiowide', cursive;">
-             ম্যাচ শুরু করার আগে অবস্যই রুলস পড়ে নিবেন!
-          </p>
-        </div>
-
-        <!-- Match Code -->
-        <div class="mb-6">
-          <p class="text-yellow-400 font-semibold mb-2 tracking-wide uppercase text-center">Game Play Code</p>
-          <div class="flex items-center gap-1 justify-center bg-yellow-900 bg-opacity-30 rounded-xl py-1 px-3 pulse-glow select-none text-2xl font-extrabold text-yellow-300">
-            Match Code:
-            <span id="matchCode" class="text-gray-300 text-xl font-extrabold tracking-wide" style="font-family: 'Audiowide', cursive;">HEZAKY</span>
-          </div>
-        </div>
-
-        <!-- Copy Button -->
-        <div class="text-center">
-          <button onclick="copyMatchCode()" class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:from-green-500 hover:via-green-600 hover:to-green-700 text-white px-8 py-3 rounded-lg font-extrabold tracking-wide shadow-lg transition duration-300 transform hover:scale-105 active:scale-95 text-xl">
-            <i class="fa-solid fa-copy mr-2"></i>Copy Code
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Main Content -->
   <main class="px-3 max-w-md mx-auto w-full">
     <p id="userName" class="text-lg font-semibold"></p>
@@ -249,8 +208,7 @@
   </a>
   </nav>
 
-  
-   <script type="module">
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, collection, getDocs, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -336,7 +294,7 @@
             <div class="flex justify-between items-center border-b border-yellow-500 pb-1">
               <div class="flex items-center gap-1">
                 <img src="dls.png" alt="DLS Logo" class="w-6 h-6 rounded-full border border-white shadow" />
-                <h4 class="font-extrabold text-gray-100 tracking-wide uppercase">${match.title || "Untitled"}</h4>
+                <h4 style="font-size: 8x;" class="font-extrabold text-gray-100 tracking-wide uppercase">${match.title || "Untitled"}</h4>
               </div>
               <div id="countdown-${matchId}" class="flex justify-center text-yellow-300 text-xs font-mono font-bold gap-2" aria-label="Match countdown timer" role="timer"></div>
             </div>
@@ -435,6 +393,73 @@
     setInterval(update, 1000);
   }
 
+  window.showTeamInput = async (matchId, currentSlot, slotLimit, entryFee) => {
+    if (!currentUser) return;
+
+    const userId = currentUser.uid;
+    const participantRef = doc(db, "matches", matchId, "participants", userId);
+    const participantSnap = await getDoc(participantRef);
+    if (participantSnap.exists()) {
+      Swal.fire("Already Joined", "You have already joined this match.", "info");
+      return;
+    }
+
+    if (currentSlot >= slotLimit) {
+      Swal.fire("Slot Full", "Sorry, this match is already full.", "warning");
+      return;
+    }
+
+    // Set modal data
+    joinMatchId = matchId;
+    joinEntryFee = entryFee;
+    joinCurrentSlot = currentSlot;
+    joinSlotLimit = slotLimit;
+    document.getElementById("popupEntryFee").innerText = entryFee.toFixed(2);
+    document.getElementById("teamName").value = "";
+
+    // Show modal
+    document.getElementById("joinPopup").classList.remove("hidden");
+  };
+
+  window.closePopup = () => {
+    document.getElementById("joinPopup").classList.add("hidden");
+  };
+
+  window.joinMatch = async () => {
+    const teamName = document.getElementById("teamName").value.trim();
+    if (!teamName) {
+      Swal.fire("Required", "Please enter your team name.", "warning");
+      return;
+    }
+
+    closePopup();
+
+    if (userBalance < joinEntryFee) {
+      Swal.fire("Insufficient Balance", "You don't have enough balance to join this match.", "error");
+      return;
+    }
+
+    try {
+      const userId = currentUser.uid;
+      await updateDoc(doc(db, "users", userId), { balance: userBalance - joinEntryFee });
+      await setDoc(doc(db, "matches", joinMatchId, "participants", userId), {
+        joinedAt: new Date(),
+        uid: userId,
+        teamName: teamName
+      });
+      await updateDoc(doc(db, "matches", joinMatchId), { slot: increment(1) });
+
+      userBalance -= joinEntryFee;
+      document.getElementById("mainBalance").innerText = `৳${userBalance.toFixed(2)}`;
+
+      Swal.fire("Joined!", "You have successfully joined the match.", "success");
+      fetchMatches();
+    } catch (error) {
+      console.error("Join match error:", error);
+      Swal.fire("Error", "Failed to join the match.", "error");
+    }
+  };
+
   window.showMatchCode = async (matchId) => {
     if (!currentUser) return;
     const userId = currentUser.uid;
@@ -458,29 +483,19 @@
       return;
     }
 
-    // ✅ Set match code in the modal
-    document.getElementById("matchCode").innerText = matchData.matchCode || "N/A";
-
-    // ✅ Show the modal
-    document.getElementById("matchcodePopup").classList.remove("hidden");
-  };
-
-  window.copyMatchCode = () => {
-    const code = document.getElementById("matchCode").innerText;
-    navigator.clipboard.writeText(code).then(() => {
-      Swal.fire("Copied!", "Match code copied to clipboard.", "success");
+    Swal.fire({
+      title: `Match Code`,
+      html: `<p class="text-yellow-400 font-bold text-lg">${matchData.matchCode || "N/A"}</p>`,
+      icon: "info",
+      confirmButtonText: "Close"
     });
-  };
-
-  window.closePopup = () => {
-    document.getElementById("joinPopup")?.classList.add("hidden");
-    document.getElementById("matchcodePopup")?.classList.add("hidden");
   };
 
   window.logout = async function () {
     await signOut(auth);
     window.location.href = "login.html";
   };
-   </script>
+</script>
+
  </body>
 </html>
