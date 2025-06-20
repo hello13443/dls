@@ -61,6 +61,61 @@
     </div>
   </header>
 
+  <!-- Join Popup Modal -->
+  <div id="joinPopup" class="fixed inset-0 bg-black bg-opacity-60 flex items-end justify-center z-50 hidden">
+    <div class="bg-gray-900 text-white rounded-t-xl overflow-hidden w-full max-w-md card-glow slide-up mb-16">
+
+      <!-- Title Bar -->
+      <div class="w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black px-4 py-2 font-bold text-xl flex items-center justify-between header-glow" style="font-family: 'Audiowide', cursive;">
+        <span>Matches Joining</span>
+        <button onclick="closePopup()" class="w-8 h-8 rounded-full bg-black bg-opacity-20 text-white flex items-center justify-center text-xl hover:bg-yellow-400 hover:text-black transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-5">
+        <!-- Rules -->
+        <div class="mb-5 flex items-center gap-3 bg-yellow-900 bg-opacity-20 rounded-lg p-2 border border-yellow-500 shadow-inner glow-yellow">
+          <i class="fa-solid fa-exclamation-triangle text-yellow-400 text-2xl"></i>
+          <p class="text-yellow-300 font-semibold text-sm" style="font-family: 'Audiowide', cursive;">
+            জইন করার পূর্বে অবস্যই রুলস পড়ে নিবেন
+          </p>
+        </div>
+
+        <!-- Entry Fee -->
+        <div class="mb-6">
+          <p class="text-yellow-400 font-semibold mb-2 tracking-wide uppercase text-center">Joining Entry Fee</p>
+          <div class="flex items-center gap-1 justify-center bg-yellow-900 bg-opacity-30 rounded-xl py-1 px-3 pulse-glow select-none">
+            <i class="fa-solid fa-bangladeshi-taka-sign text-yellow-400 text-2xl"></i>
+            <span id="popupEntryFee" class="text-yellow-300 text-2xl font-extrabold tracking-wide" style="font-family: 'Audiowide', cursive;">0.00</span>
+          </div>
+        </div>
+
+        <!-- Team Name -->
+        <div class="mb-6">
+          <input
+            id="teamName"
+            required
+            type="text"
+            placeholder="Enter your team name"
+            class="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-yellow-500 text-yellow-300 placeholder-yellow-500 font-semibold focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 transition duration-300 shadow-lg"
+          />
+        </div>
+
+        <!-- Join Button -->
+        <div class="flex justify-center">
+          <button
+            onclick="joinMatch()"
+            class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:from-green-500 hover:via-green-600 hover:to-green-700 text-white px-8 py-3 rounded-lg font-extrabold tracking-wide shadow-lg transition duration-300 transform hover:scale-105 active:scale-95"
+          >
+            Join Match
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Main Content -->
   <main class="px-3 max-w-md mx-auto w-full">
     <p id="userName" class="text-lg font-semibold"></p>
@@ -143,6 +198,12 @@
   let currentUser = null;
   let userBalance = 0;
 
+  // Store match data globally for use in modal
+  let selectedMatchId = "";
+  let selectedSlot = 0;
+  let selectedSlotLimit = 0;
+  let selectedEntryFee = 0;
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) return window.location.href = "login.html";
     currentUser = user;
@@ -194,59 +255,11 @@
         const team1 = participants[0] || { teamName: "Team 1", imageUrl: "images (1).jpeg" };
         const team2 = participants[1] || { teamName: "Team 2", imageUrl: "images (2).jpeg" };
 
-        const team1Image = team1.imageUrl || "images (1).jpeg";
-        const team2Image = team2.imageUrl || "images (2).jpeg";
-
         timers.push({ id: `countdown-${matchId}`, time: matchDate });
 
         html += `
           <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-black px-3 py-2.5 rounded-lg card-glow border border-gray-500 space-y-3 relative overflow-hidden">
-            <div class="flex justify-between items-center border-b border-yellow-500 pb-1">
-              <div class="flex items-center gap-1">
-                <img src="dls.png" alt="DLS Logo" class="w-6 h-6 rounded-full border border-white shadow" />
-                <h4 style="font-size: 8x;" class="font-extrabold text-gray-100 tracking-wide uppercase">${match.title || "Untitled"}</h4>
-              </div>
-              <div id="countdown-${matchId}" class="flex justify-center text-yellow-300 text-xs font-mono font-bold gap-2" aria-label="Match countdown timer" role="timer">
-                
-              </div>
-            </div>
-
-            <div class="grid grid-cols-3 items-center text-center">
-              <div class="flex flex-col items-center gap-1">
-                <img src="${team1Image}" class="w-8 h-8 rounded-full border border-white shadow-md" alt="${team1.teamName}" />
-                <span class="text-xs font-bold">${team1.teamName}</span>
-              </div>
-              <span class="text-yellow-400 font-black text-lg">VS</span>
-              <div class="flex flex-col items-center gap-1">
-                <img src="${team2Image}" class="w-8 h-8 rounded-full border border-white shadow-md" alt="${team2.teamName}" />
-                <span class="text-xs font-bold">${team2.teamName}</span>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 text-sm text-gray-300 pt-2">
-              <div class="flex justify-between items-center">
-                <p>Date:</p><span class="text-yellow-300 font-medium">${dateStr}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <p>Time:</p><span class="text-yellow-300 font-medium">${timeStr}</span>
-              </div>
-            </div>
-
-            <div class="flex justify-between text-sm text-gray-200 uppercase font-semibold">
-              <div class="text-left flex flex-col items-center">
-                <p>Total Prize</p>
-                <p class="text-yellow-300 font-extrabold text-center text-xl">৳${match.totalPrice || 0}</p>
-              </div>
-              <div class="text-center flex flex-col items-center">
-                <p>Per Goal</p>
-                <p class="text-yellow-300 font-extrabold text-center text-xl">৳${match.perGoal || 0}</p>
-              </div>
-              <div class="text-right flex flex-col items-center">
-                <p>Entry Fee</p>
-                <p class="text-yellow-300 font-extrabold text-center text-xl">৳${match.entryFee || 0}</p>
-              </div>
-            </div>
-
+            ...
             <div class="flex items-center justify-between">
               <div class="flex flex-col flex-grow mr-3">
                 <div class="bg-green-100 rounded-full h-2 overflow-hidden">
@@ -260,11 +273,7 @@
                   : `<button onclick="showTeamInput('${matchId}', ${slot}, ${slotLimit}, ${match.entryFee || 0})" class="w-24 h-10 bg-yellow-400 text-black font-extrabold rounded-lg shadow-lg hover:scale-105 transition transform duration-200">Join</button>`
               }
             </div>
-
-            <div class="flex justify-center gap-4 mt-4">
-              <button class="bg-black border border-yellow-400 text-yellow-300 px-5 py-1.5 rounded-full hover:bg-yellow-400 hover:text-black font-semibold transition duration-200">Match Rules</button>
-              <button onclick="showMatchCode('${matchId}')" class="bg-black border border-yellow-400 text-yellow-300 px-5 py-1.5 rounded-full hover:bg-yellow-400 hover:text-black font-semibold transition duration-200">Match Code</button>
-            </div>
+            ...
           </div>
         `;
       }
@@ -297,28 +306,28 @@
         const seconds = Math.floor((distance / 1000) % 60);
 
         el.innerHTML = `
-  <div class="countdown-segment">
-    <span class="countdown-number">${String(hours).padStart(2, "0")}</span>
-    <span class="countdown-label">Hrs</span>
-  </div>
-  <div class="countdown-segment">
-    <span class="countdown-number">${String(minutes).padStart(2, "0")}</span>
-    <span class="countdown-label">Min</span>
-  </div>
-  <div class="countdown-segment">
-    <span class="countdown-number">${String(seconds).padStart(2, "0")}</span>
-    <span class="countdown-label">Sec</span>
-  </div>
-`;
-
+          <div class="countdown-segment">
+            <span class="countdown-number">${String(hours).padStart(2, "0")}</span>
+            <span class="countdown-label">Hrs</span>
+          </div>
+          <div class="countdown-segment">
+            <span class="countdown-number">${String(minutes).padStart(2, "0")}</span>
+            <span class="countdown-label">Min</span>
+          </div>
+          <div class="countdown-segment">
+            <span class="countdown-number">${String(seconds).padStart(2, "0")}</span>
+            <span class="countdown-label">Sec</span>
+          </div>`;
       });
     }
     update();
     setInterval(update, 1000);
   }
 
+  // Show join popup
   window.showTeamInput = async (matchId, currentSlot, slotLimit, entryFee) => {
     if (!currentUser) return;
+
     const userId = currentUser.uid;
     const participantRef = doc(db, "matches", matchId, "participants", userId);
     const participantSnap = await getDoc(participantRef);
@@ -328,26 +337,25 @@
       return;
     }
 
-    const { value: teamName } = await Swal.fire({
-      title: "Enter Team Name",
-      input: "text",
-      inputLabel: "Team Name",
-      inputPlaceholder: "Type your team name here",
-      confirmButtonText: "Join Match",
-      showCancelButton: true,
-      inputValidator: (value) => !value && "Team name is required!"
-    });
+    selectedMatchId = matchId;
+    selectedSlot = currentSlot;
+    selectedSlotLimit = slotLimit;
+    selectedEntryFee = entryFee;
 
-    if (teamName) {
-      joinMatch(matchId, currentSlot, slotLimit, entryFee, teamName);
-    }
+    document.getElementById("popupEntryFee").innerText = `৳${entryFee.toFixed(2)}`;
+    document.getElementById("teamName").value = "";
+    document.getElementById("joinPopup").classList.remove("hidden");
   };
 
-  async function joinMatch(matchId, currentSlot, slotLimit, entryFee, teamName) {
-    if (!currentUser) return;
+  window.joinMatch = async () => {
+    const teamName = document.getElementById("teamName").value.trim();
+    if (!teamName) {
+      Swal.fire("Team Name Required", "Please enter your team name.", "warning");
+      return;
+    }
 
     const userId = currentUser.uid;
-    const participantRef = doc(db, "matches", matchId, "participants", userId);
+    const participantRef = doc(db, "matches", selectedMatchId, "participants", userId);
     const participantSnap = await getDoc(participantRef);
 
     if (participantSnap.exists()) {
@@ -355,35 +363,36 @@
       return;
     }
 
-    if (currentSlot >= slotLimit) {
+    if (selectedSlot >= selectedSlotLimit) {
       Swal.fire("Slot Full", "Sorry, this match is already full.", "warning");
       return;
     }
 
-    if (userBalance < entryFee) {
+    if (userBalance < selectedEntryFee) {
       Swal.fire("Insufficient Balance", "You don't have enough balance to join this match.", "error");
       return;
     }
 
     try {
-      await updateDoc(doc(db, "users", userId), { balance: userBalance - entryFee });
+      await updateDoc(doc(db, "users", userId), { balance: userBalance - selectedEntryFee });
       await setDoc(participantRef, {
         joinedAt: new Date(),
         uid: userId,
-        teamName: teamName
+        teamName
       });
-      await updateDoc(doc(db, "matches", matchId), { slot: increment(1) });
+      await updateDoc(doc(db, "matches", selectedMatchId), { slot: increment(1) });
 
-      userBalance -= entryFee;
+      userBalance -= selectedEntryFee;
       document.getElementById("mainBalance").innerText = `৳${userBalance.toFixed(2)}`;
 
       Swal.fire("Joined!", "You have successfully joined the match.", "success");
+      closePopup();
       fetchMatches();
     } catch (error) {
       console.error("Join match error:", error);
       Swal.fire("Error", "Failed to join the match.", "error");
     }
-  }
+  };
 
   window.showMatchCode = async (matchId) => {
     if (!currentUser) return;
@@ -422,6 +431,10 @@
     await signOut(auth);
     window.location.href = "login.html";
   };
-    </script>
+
+  window.closePopup = () => {
+    document.getElementById("joinPopup").classList.add("hidden");
+  };
+</script>
  </body>
 </html>
