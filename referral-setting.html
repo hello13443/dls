@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Referral Settings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Header -->
+  <header class="bg-white shadow-md relative">
+    <div class="max-w-7xl mx-auto px-4 py-3 relative flex items-center justify-center">
+      <!-- Back Icon (left side) -->
+      <p onclick="window.location.href='/admin.html'" class="absolute left-4 text-gray-700 cursor-pointer">
+        <i class="fas fa-arrow-left text-2xl"></i>
+      </p>
+
+      <!-- Centered Title -->
+      <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
+    </div>
+  </header>
+
+   <!-- Main Content -->
+  <main class="flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white shadow-lg rounded-md p-6 sm:p-8 mt-10">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Referral Bonus Settings</h2>
+
+      <form class="space-y-4">
+        <div>
+          <label class="block text-gray-700 font-medium mb-1" for="referralBonusInput">Referral Bonus (৳)</label>
+          <input id="referralBonusInput" type="number" min="0" step="0.01"
+            class="w-full border border-gray-400 rounded-md px-4 py-2 outline-none" />
+        </div>
+      </form>
+
+      <div class="mt-6">
+        <p id="updateReferralBonusBtn"
+          class="w-full bg-blue-600 text-white text-center font-semibold py-2 px-4 rounded-md cursor-pointer">
+          <i class="fas fa-save mr-2"></i>Update Bonus
+        </p>
+      </div>
+      <p id="referralBonusStatus" class="text-sm mt-4 text-gray-700 text-center sm:text-left"></p>
+    </div>
+  </main>
+
+<script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+    // Updated Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
+      authDomain: "dlstournament-31ac1.firebaseapp.com",
+      projectId: "dlstournament-31ac1",
+      storageBucket: "dlstournament-31ac1.appspot.com",
+      messagingSenderId: "874377019055",
+      appId: "1:874377019055:web:6e38db2ec7f0d541d2de5a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Load Referral Bonus
+    async function loadReferralBonus() {
+      const docRef = doc(db, "referSettings", "rewards");
+      try {
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const bonus = docSnap.data().referBonus || 0;
+          document.getElementById("referralBonusInput").value = bonus;
+        } else {
+          document.getElementById("referralBonusStatus").textContent = "Referral bonus setting not found.";
+        }
+      } catch (error) {
+        console.error("Error loading referral bonus:", error);
+        document.getElementById("referralBonusStatus").textContent = "Error loading referral bonus.";
+      }
+    }
+
+    // Update Referral Bonus
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("updateReferralBonusBtn").addEventListener("click", async () => {
+        const newBonus = parseFloat(document.getElementById("referralBonusInput").value);
+        if (isNaN(newBonus) || newBonus < 0) {
+          alert("Please enter a valid non-negative number.");
+          return;
+        }
+
+        const docRef = doc(db, "referSettings", "rewards");
+        try {
+          await updateDoc(docRef, { referBonus: newBonus });
+          document.getElementById("referralBonusStatus").textContent = "Referral bonus updated successfully.";
+        } catch (error) {
+          console.error("Error updating referral bonus:", error);
+          document.getElementById("referralBonusStatus").textContent = "Failed to update referral bonus.";
+        }
+      });
+    });
+
+    // Auth check and init
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadReferralBonus();
+      } else {
+        document.getElementById("referralBonusStatus").textContent = "Please log in as admin.";
+      }
+    });
+</script>
+</body>
+</html>
