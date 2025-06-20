@@ -1,22 +1,15 @@
-<!-- নিচের কোডটি সম্পূর্ণ HTML ফাইল -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Profile</title>
+  <title>Dls Tournament</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet" />
-
-  <!-- Font Awesome Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-
-  <!-- Audiowide Font -->
   <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet" />
-
-  <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
@@ -62,9 +55,9 @@
     <section class="bg-gray-900 bg-opacity-50 border border-gray-700 rounded-xl p-1 px-3 space-y-2 text-center">
       <div>
         <h4 class="text-yellow-400 font-semibold text-base">Your Refer Link</h4>
-        <div class="mt-2 bg-gray-800 p-2 rounded-lg border border-yellow-400 flex items-center justify-between text-sm text-yellow-300">
-          <span id="referLink">https://khelodls.com/ref/HPQVS15TulN</span>
-          <button onclick="copyReferLink()" class="text-yellow-200 hover:text-white text-sm ml-2">
+        <div class="mt-2 flex gap-2">
+          <input id="referLink" readonly class="bg-gray-800 border border-yellow-400 w-full text-yellow-300 rounded-lg p-2 text-sm" />
+          <button onclick="copyReferLink()" class="bg-yellow-400 hover:bg-yellow-500 text-black px-3 rounded-lg text-sm">
             <i class="fa-solid fa-copy"></i>
           </button>
         </div>
@@ -75,7 +68,7 @@
       </div>
     </section>
 
-    <!-- Deposit & Withdraw Buttons Section -->
+    <!-- Deposit & Withdraw Buttons -->
     <section class="bg-gray-900 bg-opacity-50 border border-gray-700 rounded-xl p-4 flex justify-between items-center gap-4">
       <a href="deposit.html" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg flex items-center justify-center gap-2 shadow-md">
         <i class="fa-solid fa-circle-down"></i> Deposit
@@ -106,8 +99,7 @@
 
       <div class="w-full flex justify-center mt-4">
         <button onclick="logout()" class="w-1/2 text-center bg-red-600 hover:bg-red-700 rounded-lg px-4 py-2 text-white flex items-center justify-center">
-          <i class="fa-solid fa-right-from-bracket mr-2"></i>
-          Logout
+          <i class="fa-solid fa-right-from-bracket mr-2"></i> Logout
         </button>
       </div>
     </section>
@@ -139,10 +131,10 @@
       </div>
       History
     </a>
-    <a class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+    <a href="profile.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
       <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-400">
         <i class="fa-solid fa-user text-lg text-gray-400 hover:text-yellow-400"></i>
-      </div> 
+      </div>
       Profile
     </a>
   </nav>
@@ -167,30 +159,28 @@
     const db = getFirestore(app);
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
+      if (!user) return window.location.href = "login.html";
 
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const data = userDoc.data();
         document.getElementById("username").innerText = data.username || "No username";
         document.getElementById("email").innerText = data.email || user.email;
-        document.getElementById("mainBalance").innerText = (data.balance || 0).toFixed(2);
+        document.getElementById("mainBalance").innerText = parseInt(data.balance) || 0;
         document.getElementById("totalRefers").innerText = data.totalRefers || 0;
-        document.getElementById("referLink").innerText = `https://khelodls.com/ref/${user.uid}`;
+        document.getElementById("referLink").value = `https://khelodls.com/ref/${user.uid}`;
       }
     });
 
-    window.logout = async function () {
+    window.logout = async () => {
       await signOut(auth);
       window.location.href = "index.html";
     };
 
-    window.copyReferLink = function () {
-      const text = document.getElementById("referLink").innerText;
-      navigator.clipboard.writeText(text).then(() => {
+    window.copyReferLink = () => {
+      const input = document.getElementById("referLink");
+      input.select();
+      navigator.clipboard.writeText(input.value).then(() => {
         Swal.fire("Copied!", "Referral link copied!", "success");
       });
     };
