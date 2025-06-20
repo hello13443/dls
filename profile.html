@@ -173,9 +173,15 @@
 
     onAuthStateChanged(auth, (user) => {
       if (!user) return window.location.href = "login.html";
+      // Display email and username
+      document.getElementById("email").textContent = user.email || "No Email";
+      document.getElementById("username").textContent = user.displayName || "No Name";
+
+      // Set referral link
       const currentDomain = window.location.origin;
       const referralLink = `${currentDomain}/signup.html?ref=${user.uid}`;
       document.getElementById("referLink").value = referralLink;
+
       hideLoader();
     });
 
