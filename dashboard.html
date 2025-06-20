@@ -411,7 +411,7 @@
         const distance = new Date(timer.time).getTime() - now;
 
         if (distance <= 0) {
-          el.innerHTML = `<span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-ping-slow border border-white shadow-md">LIVE</span>`;
+          el.innerHTML = `<span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-ping-slow border border-white shadow-md font-bold animate-pulse">LIVE</span>`;
           return;
         }
 
