@@ -73,6 +73,32 @@
     .slide-up {
       animation: slideUp 0.4s ease-out forwards;
     }
+
+    /* New LIVE animation */
+    @keyframes livePulseGlow {
+      0% {
+        transform: scale(1);
+        color: #fbbf24;
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.15);
+        color: #fffbdb;
+        opacity: 0.85;
+      }
+      100% {
+        transform: scale(1);
+        color: #fbbf24;
+        opacity: 1;
+      }
+    }
+
+    .live-badge {
+      animation: livePulseGlow 2.5s ease-in-out infinite;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      user-select: none;
+    }
   </style>
 </head>
 <body class="bg-black text-white flex flex-col min-h-screen pb-16 relative">
@@ -411,8 +437,8 @@
         const distance = new Date(timer.time).getTime() - now;
 
         if (distance <= 0) {
-          el.innerHTML = `<span class="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-ping-slow border border-white shadow-md font-bold animate-pulse opacity-30">LIVE</span>`;
-          return;
+          el.innerHTML = `<div class="relative bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-md live-badge">LIVE</div>`;
+       return;
         }
 
         const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
