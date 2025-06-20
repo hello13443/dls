@@ -444,7 +444,7 @@
         const distance = new Date(timer.time).getTime() - now;
 
         if (distance <= 0) {
-          el.innerHTML = `<div class="relative bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-md live-badge">LIVE</div>`;
+          el.innerHTML = `<span class="relative bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-sm shadow-md font-bold animate-pulse">LIVE</span>`;
        return;
         }
 
