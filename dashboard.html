@@ -314,8 +314,8 @@
       document.getElementById("mainBalance").innerText = formatBalance(userBalance);
     }
 
-    fetchMatches();
-    hideLoader(); // Loader hide after authentication and match fetch
+    hideLoader(); // Hide loader first
+    fetchMatches(); // Then fetch matches
   });
 
   async function fetchMatches() {
