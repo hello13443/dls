@@ -175,7 +175,7 @@
       if (!user) return window.location.href = "login.html";
       // Display email and username
       document.getElementById("email").textContent = user.email || "No Email";
-      document.getElementById("username").textContent = user.displayName || "No Name";
+      document.getElementById("username").textContent = user.username || "No Name";
 
       // Set referral link
       const currentDomain = window.location.origin;
