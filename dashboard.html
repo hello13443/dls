@@ -272,6 +272,7 @@
   let currentUser = null;
   let userBalance = 0;
 
+  // Temp values for joining
   let joinMatchId = null;
   let joinCurrentSlot = 0;
   let joinSlotLimit = 0;
@@ -337,8 +338,10 @@
                 <img src="dls.png" alt="DLS Logo" class="w-6 h-6 rounded-full border border-white shadow" />
                 <h4 style="font-size: 13.8px;" class="font-extrabold text-gray-100 tracking-wide uppercase">${match.title || "Untitled"}</h4>
               </div>
-              <div id="countdown-${matchId}" class="flex justify-center text-yellow-300 text-xs font-mono font-bold gap-2"></div>
+              <div id="countdown-${matchId}" class="flex justify-center text-yellow-300 text-xs font-mono font-bold gap-2" aria-label="Match countdown timer" role="timer">
+              </div>
             </div>
+
             <div class="grid grid-cols-3 items-center text-center">
               <div class="flex flex-col items-center gap-1">
                 <img src="${team1.imageUrl}" class="w-8 h-8 rounded-full border border-white shadow-md" alt="${team1.teamName}" />
@@ -350,6 +353,7 @@
                 <span class="text-xs font-bold">${team2.teamName}</span>
               </div>
             </div>
+
             <div class="grid grid-cols-2 gap-3 text-sm text-gray-300 pt-2">
               <div class="flex justify-between items-center">
                 <p>Date:</p><span class="text-yellow-300 font-medium">${dateStr}</span>
@@ -358,6 +362,7 @@
                 <p>Time:</p><span class="text-yellow-300 font-medium">${timeStr}</span>
               </div>
             </div>
+
             <div class="flex justify-between text-sm text-gray-200 uppercase font-semibold">
               <div class="text-left flex flex-col items-center">
                 <p>Total Prize</p>
@@ -372,6 +377,7 @@
                 <p class="text-yellow-300 font-extrabold text-center text-xl">৳${match.entryFee || 0}</p>
               </div>
             </div>
+
             <div class="flex items-center justify-between">
               <div class="flex flex-col flex-grow mr-3">
                 <div class="bg-green-100 rounded-full h-2 overflow-hidden">
@@ -385,11 +391,13 @@
                   : `<button onclick="showTeamInput('${matchId}', ${slot}, ${slotLimit}, ${match.entryFee || 0})" class="w-24 h-10 bg-gradient-to-r from-lime-200 via-lime-400 to-lime-500 text-black font-extrabold rounded-lg shadow-lg hover:scale-105 transition transform duration-200">Join</button>`
               }
             </div>
+
             <div class="flex justify-center gap-4 mt-4">
               <button class="bg-black border border-yellow-400 text-yellow-300 px-5 py-1.5 rounded-full hover:bg-yellow-400 hover:text-black font-semibold transition duration-200">Match Rules</button>
               <button onclick="showMatchCode('${matchId}')" class="bg-black border border-yellow-400 text-yellow-300 px-5 py-1.5 rounded-full hover:bg-yellow-400 hover:text-black font-semibold transition duration-200">Match Code</button>
             </div>
-          </div>`;
+          </div>
+        `;
       }
 
       matchListEl.innerHTML = html || "<p class='text-gray-400'>No upcoming matches found.</p>";
@@ -419,14 +427,18 @@
 
         el.innerHTML = `
           <div class="countdown-segment">
-            <span class="countdown-number">${hours}</span><span class="countdown-label">Hrs</span>
+            <span class="countdown-number">${hours}</span>
+            <span class="countdown-label">Hrs</span>
           </div>
           <div class="countdown-segment">
-            <span class="countdown-number">${minutes}</span><span class="countdown-label">Min</span>
+            <span class="countdown-number">${minutes}</span>
+            <span class="countdown-label">Min</span>
           </div>
           <div class="countdown-segment">
-            <span class="countdown-number">${seconds}</span><span class="countdown-label">Sec</span>
-          </div>`;
+            <span class="countdown-number">${seconds}</span>
+            <span class="countdown-label">Sec</span>
+          </div>
+        `;
       });
     }
     update();
@@ -455,6 +467,7 @@
     joinSlotLimit = slotLimit;
     joinEntryFee = entryFee;
 
+    // Show updated fee in popup
     document.getElementById("popupEntryFee").innerText = `${entryFee}`;
     document.getElementById("teamName").value = "";
     document.getElementById("joinPopup").classList.remove("hidden");
@@ -510,6 +523,10 @@
     }
   };
 
+  window.closePopup = () => {
+    document.getElementById("joinPopup").classList.add("hidden");
+  };
+
   window.showMatchCode = async (matchId) => {
     const userId = currentUser?.uid;
     const matchRef = doc(db, "matches", matchId);
@@ -533,29 +550,18 @@
       return;
     }
 
-    // Show in custom modal
-    document.getElementById("matchCode").innerText = match.matchCode || "N/A";
-    document.getElementById("matchcodePopup").classList.remove("hidden");
-  };
-
-  window.copyMatchCode = () => {
-    const code = document.getElementById("matchCode").innerText;
-    navigator.clipboard.writeText(code).then(() => {
-      Swal.fire("Copied!", "Match code copied to clipboard.", "success");
-    }).catch(err => {
-      Swal.fire("Error", "Failed to copy code.", "error");
+    Swal.fire({
+      title: "Match Code",
+      html: `<p class="text-yellow-400 font-bold text-lg">${match.matchCode || "N/A"}</p>`,
+      icon: "info",
+      confirmButtonText: "Close"
     });
-  };
-
-  window.closePopup = () => {
-    document.getElementById("joinPopup").classList.add("hidden");
-    document.getElementById("matchcodePopup").classList.add("hidden");
   };
 
   window.logout = async function () {
     await signOut(auth);
     window.location.href = "login.html";
   };
-</script>
+  </script>
  </body>
 </html>
