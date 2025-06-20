@@ -153,6 +153,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
@@ -165,22 +166,29 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     function hideLoader() {
       const loader = document.getElementById('loadingOverlay');
       if (loader) loader.style.display = 'none';
     }
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (!user) return window.location.href = "login.html";
-      // Display email and username
-      document.getElementById("email").textContent = user.email || "No Email";
-      document.getElementById("username").textContent = user.username || "No Name";
 
-      // Set referral link
-      const currentDomain = window.location.origin;
-      const referralLink = `${currentDomain}/signup.html?ref=${user.uid}`;
+      document.getElementById("email").textContent = user.email || "No Email";
+      const referralLink = `${window.location.origin}/signup.html?ref=${user.uid}`;
       document.getElementById("referLink").value = referralLink;
+
+      const userDocRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDocRef);
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        document.getElementById("username").textContent = userData.username || "No Name";
+        document.getElementById("mainBalance").textContent = userData.balance ?? 0;
+        document.getElementById("totalRefers").textContent = userData.refers ?? 0;
+      }
 
       hideLoader();
     });
