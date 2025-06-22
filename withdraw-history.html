@@ -34,6 +34,7 @@
     </div>
   </header>
 
+  <!-- Withdraw History -->
   <main class="p-4 max-w-3xl mx-auto">
     <section>
       <div id="withdrawHistory" class="space-y-4">
@@ -44,50 +45,45 @@
     </section>
   </main>
 
-  <!-- Bottom Navigation Bar -->
+  <!-- Bottom Navigation -->
   <nav class="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-700 flex justify-around items-center py-2 rounded-t-2xl shadow-inner text-white h-16 z-10">
     <a href="dashboard.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
         <i class="fa-solid fa-gamepad text-lg text-gray-300 hover:text-yellow-400"></i>
       </div>
       Home
     </a>
-
     <a href="result.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
         <i class="fa-solid fa-ranking-star text-lg text-gray-300 hover:text-yellow-400"></i>
       </div>
       Result
     </a>
-
     <a href="league.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
         <i class="fa-solid fa-trophy text-lg text-gray-300 hover:text-yellow-400"></i>
       </div>
       League
     </a>
-
     <a href="match-history.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
         <i class="fa-solid fa-clock-rotate-left text-lg text-gray-300 hover:text-yellow-400"></i>
       </div>
       History
     </a>
-
     <a href="profile.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-400">
+      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-400">
         <i class="fa-solid fa-user text-lg text-gray-400 hover:text-yellow-400"></i>
       </div> 
       Profile
     </a>
   </nav>
 
+  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import {
-      getFirestore, collection, query, where, getDocs, orderBy
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
@@ -111,15 +107,14 @@
       }
 
       try {
-        const withdrawQuery = query(
+        const q = query(
           collection(db, "withdraws"),
           where("uid", "==", user.uid),
           orderBy("timestamp", "desc")
         );
+        const snap = await getDocs(q);
 
-        const withdrawSnap = await getDocs(withdrawQuery);
-
-        if (withdrawSnap.empty) {
+        if (snap.empty) {
           historyContainer.innerHTML = `
             <div class="bg-black p-6 rounded-lg shadow text-center text-gray-100">
               No withdraw history found.
@@ -129,14 +124,14 @@
         }
 
         historyContainer.innerHTML = "";
-        withdrawSnap.forEach(doc => {
+        snap.forEach(doc => {
           const data = doc.data();
           const amount = data.amount || 0;
           const method = data.method || "N/A";
           const address = data.address || "N/A";
+          const status = data.status || "pending";
           const timestamp = data.timestamp?.toDate?.();
           const date = timestamp ? timestamp.toLocaleString() : "N/A";
-          const status = data.status || "pending";
 
           let borderColor = "border-yellow-400";
           let statusColor = "text-yellow-400";
@@ -166,7 +161,7 @@
           historyContainer.innerHTML += card;
         });
       } catch (err) {
-        console.error("Withdraw history error:", err);
+        console.error("Withdraw History Load Error:", err);
         historyContainer.innerHTML = `
           <div class="bg-red-100 text-red-600 p-5 rounded-lg shadow text-center">
             Error loading history. Check console for details.
