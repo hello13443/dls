@@ -105,7 +105,10 @@
     const historyContainer = document.getElementById("withdrawHistory");
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) return window.location.href = "login.html";
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
 
       try {
         const withdrawQuery = query(
@@ -113,6 +116,7 @@
           where("uid", "==", user.uid),
           orderBy("timestamp", "desc")
         );
+
         const withdrawSnap = await getDocs(withdrawQuery);
 
         if (withdrawSnap.empty) {
@@ -130,7 +134,8 @@
           const amount = data.amount || 0;
           const method = data.method || "N/A";
           const address = data.address || "N/A";
-          const date = data.timestamp?.toDate().toLocaleString() || "N/A";
+          const timestamp = data.timestamp?.toDate?.();
+          const date = timestamp ? timestamp.toLocaleString() : "N/A";
           const status = data.status || "pending";
 
           let borderColor = "border-yellow-400";
@@ -161,12 +166,12 @@
           historyContainer.innerHTML += card;
         });
       } catch (err) {
+        console.error("Withdraw history error:", err);
         historyContainer.innerHTML = `
           <div class="bg-red-100 text-red-600 p-5 rounded-lg shadow text-center">
-            Error loading history.
+            Error loading history. Check console for details.
           </div>
         `;
-        console.error(err);
       }
     });
   </script>
