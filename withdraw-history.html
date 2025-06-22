@@ -9,6 +9,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <style>
     .glow-yellow {
       box-shadow: 0 0 5px rgb(246,201,0);
@@ -27,13 +28,12 @@
     </div>
     <div class="flex items-center gap-6 text-2xl text-gray-100">
       <i class="fa-solid fa-headset font-bold text-1xl"></i>
-      <div class="bg-gray-900 w-5 h-8 hover:border-purple-500 flex items-center justify-center rounded-sm border border-gray-700" onclick="toggleProfile()">
+      <div id="ProfileBtn" class="bg-gray-900 w-5 h-8 hover:border-purple-500 flex items-center justify-center rounded-sm border border-gray-700" onclick="toggleProfile()">
         <i class="fa-solid fa-ellipsis-vertical"></i>
       </div>
     </div>
   </header>
 
-  <!-- Withdraw History -->
   <main class="p-4 max-w-3xl mx-auto">
     <section>
       <div id="withdrawHistory" class="space-y-4">
@@ -44,45 +44,49 @@
     </section>
   </main>
 
-  <!-- Bottom Navigation -->
   <nav class="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-700 flex justify-around items-center py-2 rounded-t-2xl shadow-inner text-white h-16 z-10">
-    <a href="dashboard.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
-        <i class="fa-solid fa-gamepad text-lg text-gray-300 hover:text-yellow-400"></i>
-      </div>
-      Home
-    </a>
-    <a href="result.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
-        <i class="fa-solid fa-ranking-star text-lg text-gray-300 hover:text-yellow-400"></i>
-      </div>
-      Result
-    </a>
-    <a href="league.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
-        <i class="fa-solid fa-trophy text-lg text-gray-300 hover:text-yellow-400"></i>
-      </div>
-      League
-    </a>
-    <a href="match-history.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
-        <i class="fa-solid fa-clock-rotate-left text-lg text-gray-300 hover:text-yellow-400"></i>
-      </div>
-      History
-    </a>
-    <a href="profile.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-400">
-        <i class="fa-solid fa-user text-lg text-gray-400 hover:text-yellow-400"></i>
-      </div> 
-      Profile
-    </a>
+  <a href="dashboard.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+    <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <i class="fa-solid fa-house text-lg text-gray-300 hover:text-yellow-400"></i>
+    </div>
+    Home
+  </a>
+
+  <a href="job.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+    <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <i class="fa-solid fa-briefcase text-lg text-gray-300 hover:text-yellow-400"></i>
+    </div>
+    Job
+  </a>
+
+  <a href="pro-account.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+    <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <i class="fa-solid fa-star text-lg text-gray-300 hover:text-yellow-400"></i>
+    </div>
+    Pro
+  </a>
+
+  <a href="team.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+    <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+      <i class="fa-solid fa-users text-lg text-gray-300 hover:text-yellow-400"></i>
+    </div>
+    Team
+  </a>
+
+  <a href="profile.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+    <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-400">
+      <i class="fa-solid fa-user text-lg text-gray-400 hover:text-yellow-400"></i>
+    </div> 
+    Profile
+  </a>
   </nav>
 
-  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      getFirestore, collection, query, where, getDocs, orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
@@ -96,33 +100,37 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
     const historyContainer = document.getElementById("withdrawHistory");
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) return window.location.href = "login.html";
 
       try {
-        const q = query(
+        const withdrawQuery = query(
           collection(db, "withdraws"),
           where("uid", "==", user.uid),
           orderBy("timestamp", "desc")
         );
-        const snap = await getDocs(q);
+        const withdrawSnap = await getDocs(withdrawQuery);
 
-        if (snap.empty) {
-          historyContainer.innerHTML = `<div class="text-center text-gray-400">No withdraw history found.</div>`;
+        if (withdrawSnap.empty) {
+          historyContainer.innerHTML = `
+            <div class="bg-black p-6 rounded-lg shadow text-center text-gray-100">
+              No withdraw history found.
+            </div>
+          `;
           return;
         }
 
         historyContainer.innerHTML = "";
-        snap.forEach(doc => {
+        withdrawSnap.forEach(doc => {
           const data = doc.data();
           const amount = data.amount || 0;
           const method = data.method || "N/A";
           const address = data.address || "N/A";
+          const date = data.timestamp?.toDate().toLocaleString() || "N/A";
           const status = data.status || "pending";
-          const timestamp = data.timestamp?.toDate?.();
-          const date = timestamp ? timestamp.toLocaleString() : "N/A";
 
           let borderColor = "border-yellow-400";
           let statusColor = "text-yellow-400";
@@ -134,7 +142,7 @@
             statusColor = "text-red-600";
           }
 
-          historyContainer.innerHTML += `
+          const card = `
             <div class="glow-yellow bg-black rounded-lg p-5 border-l-4 ${borderColor}">
               <div class="flex justify-between items-center mb-2">
                 <h3 class="text-lg font-semibold text-yellow-400">৳${amount}</h3>
@@ -149,14 +157,15 @@
               </div>
             </div>
           `;
+          historyContainer.innerHTML += card;
         });
       } catch (err) {
-        console.error("Withdraw History Load Error:", err);
         historyContainer.innerHTML = `
           <div class="bg-red-100 text-red-600 p-5 rounded-lg shadow text-center">
-            Error loading history. Check console for details.
+            Error loading history.
           </div>
         `;
+        console.error(err);
       }
     });
   </script>
