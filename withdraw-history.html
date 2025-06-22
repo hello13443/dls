@@ -9,7 +9,6 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
   <style>
     .glow-yellow {
       box-shadow: 0 0 5px rgb(246,201,0);
@@ -28,7 +27,7 @@
     </div>
     <div class="flex items-center gap-6 text-2xl text-gray-100">
       <i class="fa-solid fa-headset font-bold text-1xl"></i>
-      <div id="ProfileBtn" class="bg-gray-900 w-5 h-8 hover:border-purple-500 flex items-center justify-center rounded-sm border border-gray-700" onclick="toggleProfile()">
+      <div class="bg-gray-900 w-5 h-8 hover:border-purple-500 flex items-center justify-center rounded-sm border border-gray-700" onclick="toggleProfile()">
         <i class="fa-solid fa-ellipsis-vertical"></i>
       </div>
     </div>
@@ -97,14 +96,10 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
     const historyContainer = document.getElementById("withdrawHistory");
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
+      if (!user) return window.location.href = "login.html";
 
       try {
         const q = query(
@@ -115,11 +110,7 @@
         const snap = await getDocs(q);
 
         if (snap.empty) {
-          historyContainer.innerHTML = `
-            <div class="bg-black p-6 rounded-lg shadow text-center text-gray-100">
-              No withdraw history found.
-            </div>
-          `;
+          historyContainer.innerHTML = `<div class="text-center text-gray-400">No withdraw history found.</div>`;
           return;
         }
 
@@ -143,7 +134,7 @@
             statusColor = "text-red-600";
           }
 
-          const card = `
+          historyContainer.innerHTML += `
             <div class="glow-yellow bg-black rounded-lg p-5 border-l-4 ${borderColor}">
               <div class="flex justify-between items-center mb-2">
                 <h3 class="text-lg font-semibold text-yellow-400">৳${amount}</h3>
@@ -158,7 +149,6 @@
               </div>
             </div>
           `;
-          historyContainer.innerHTML += card;
         });
       } catch (err) {
         console.error("Withdraw History Load Error:", err);
