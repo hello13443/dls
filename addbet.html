@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Task Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md relative">
+      <div class="max-w-7xl mx-auto px-4 py-3 relative flex items-center justify-center">
+        <p onclick="window.location.href='/admin.html'" class="absolute left-4 text-gray-700 cursor-pointer">
+          <i class="fas fa-arrow-left text-2xl"></i>
+        </p>
+        <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
+      </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-6">
+      <!-- Task Form Section -->
+      <section class="bg-white rounded-xl shadow-md p-6 mb-10">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Add / Edit Task</h2>
+        <form id="taskForm" class="space-y-5">
+          <input type="hidden" id="taskId" />
+          <div>
+            <label for="taskName" class="block font-medium text-gray-700 mb-1">Task Name</label>
+            <input type="text" id="taskName" required placeholder="Enter task name"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div>
+            <label for="taskDesc" class="block font-medium text-gray-700 mb-1">Description</label>
+            <textarea id="taskDesc" rows="4" placeholder="Enter task description (optional)"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+          </div>
+          <div>
+            <label for="taskReward" class="block font-medium text-gray-700 mb-1">Reward Amount (৳)</label>
+            <input type="number" id="taskReward" required placeholder="Enter reward amount (e.g. 5)" min="0" step="0.01"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div>
+            <label for="taskView" class="block font-medium text-gray-700 mb-1">View Name (URL)</label>
+            <input type="url" id="taskView" placeholder="Enter view link (e.g. https://example.com)"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <button type="submit"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium transition">Save Task</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Reset Button -->
+      <div class="mb-6 flex justify-end">
+        <button id="resetTasksBtn"
+          class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium shadow-md transition">
+          <i class="fas fa-rotate-left mr-2"></i>Reset Tasks
+        </button>
+      </div>
+
+      <!-- Tasks List Section -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">All Tasks</h2>
+        <div id="tasksList" class="space-y-4" role="list" aria-live="polite">
+          <p class="text-center text-indigo-500 italic">Loading tasks...</p>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        doc,
+        setDoc,
+        deleteDoc,
+        getDocs,
+        onSnapshot,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
+        authDomain: "dlstournament-31ac1.firebaseapp.com",
+        projectId: "dlstournament-31ac1",
+        storageBucket: "dlstournament-31ac1.appspot.com",
+        messagingSenderId: "874377019055",
+        appId: "1:874377019055:web:6e38db2ec7f0d541d2de5a"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      const tasksCol = collection(db, "tasks");
+      const tasksList = document.getElementById("tasksList");
+      const taskForm = document.getElementById("taskForm");
+      const taskIdInput = document.getElementById("taskId");
+      const taskNameInput = document.getElementById("taskName");
+      const taskDescInput = document.getElementById("taskDesc");
+      const taskRewardInput = document.getElementById("taskReward");
+      const taskViewInput = document.getElementById("taskView");
+      const resetTasksBtn = document.getElementById("resetTasksBtn");
+
+      function showToast(message, icon = "success") {
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          icon: icon,
+          title: message,
+        });
+      }
+
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          Swal.fire({
+            icon: "warning",
+            title: "Please log in first.",
+            confirmButtonText: "OK"
+          }).then(() => {
+            window.location.href = "login.html";
+          });
+          return;
+        }
+        loadTasksRealtime();
+      });
+
+      function loadTasksRealtime() {
+        onSnapshot(tasksCol, (snapshot) => {
+          if (snapshot.empty) {
+            tasksList.innerHTML = '<p class="text-center text-indigo-500 italic">No tasks found.</p>';
+            return;
+          }
+
+          tasksList.innerHTML = "";
+          snapshot.forEach((docSnap) => {
+            const task = { id: docSnap.id, ...docSnap.data() };
+
+            const taskDiv = document.createElement("div");
+            taskDiv.className = "p-6 bg-white rounded-2xl shadow-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4";
+
+            const info = document.createElement("div");
+            info.className = "flex-1 min-w-0";
+            info.innerHTML = `
+              <p class="text-lg font-semibold text-indigo-700 truncate">${task.name}</p>
+              <p class="text-sm text-gray-600 mt-1 line-clamp-2">${task.description || ""}</p>
+              <p class="mt-2 font-medium text-indigo-600">Reward: ৳${task.reward?.toFixed(2) || "0.00"}</p>
+              ${task.view ? `<p class="mt-1"><a href="${task.view}" target="_blank" class="text-blue-600 underline hover:text-blue-800">View</a></p>` : ""}
+            `;
+
+            const controls = document.createElement("div");
+            controls.className = "flex gap-2 sm:gap-3";
+
+            const editBtn = document.createElement("button");
+            editBtn.className = "bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-300";
+            editBtn.innerHTML = `<i class="fas fa-edit"></i> Edit`;
+            editBtn.title = "Edit Task";
+            editBtn.onclick = () => {
+              taskIdInput.value = task.id;
+              taskNameInput.value = task.name;
+              taskDescInput.value = task.description || "";
+              taskRewardInput.value = task.reward;
+              taskViewInput.value = task.view || "";
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            };
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-red-400";
+            deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Delete`;
+            deleteBtn.title = "Delete Task";
+            deleteBtn.onclick = async () => {
+              if (confirm(`Delete task "${task.name}"? This action cannot be undone.`)) {
+                try {
+                  await deleteDoc(doc(db, "tasks", task.id));
+                  showToast("Task deleted.");
+                } catch (error) {
+                  showToast("Error deleting task: " + error.message, "error");
+                }
+              }
+            };
+
+            controls.appendChild(editBtn);
+            controls.appendChild(deleteBtn);
+
+            taskDiv.appendChild(info);
+            taskDiv.appendChild(controls);
+            tasksList.appendChild(taskDiv);
+          });
+        });
+      }
+
+      taskForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const id = taskIdInput.value.trim();
+        const name = taskNameInput.value.trim();
+        const description = taskDescInput.value.trim();
+        const reward = parseFloat(taskRewardInput.value);
+        const view = taskViewInput.value.trim();
+
+        if (!name) return showToast("Task name is required.", "warning");
+        if (isNaN(reward) || reward < 0) return showToast("Reward must be a valid non-negative number.", "warning");
+
+        try {
+          if (id) {
+            await setDoc(doc(db, "tasks", id), { name, description, reward, view }, { merge: true });
+            showToast("Task updated.");
+          } else {
+            await setDoc(doc(collection(db, "tasks")), { name, description, reward, view });
+            showToast("Task added.");
+          }
+
+          taskForm.reset();
+          taskNameInput.focus();
+        } catch (error) {
+          showToast("Error saving task: " + error.message, "error");
+        }
+      });
+
+      resetTasksBtn.addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to reset all tasks? This will delete all current tasks and add new ones.")) return;
+
+        try {
+          const snapshot = await getDocs(tasksCol);
+          const deletePromises = snapshot.docs.map(docSnap => deleteDoc(docSnap.ref));
+          await Promise.all(deletePromises);
+
+          const newTasks = [
+            {
+              name: "Visit Example Website",
+              description: "Go to https://example.com and take a look.",
+              reward: 5,
+              view: "https://example.com",
+            },
+            {
+              name: "Watch Promo Video",
+              description: "Watch the full video to earn your reward.",
+              reward: 10,
+              view: "https://youtube.com",
+            },
+            {
+              name: "Join Telegram Group",
+              description: "Stay updated by joining our Telegram channel.",
+              reward: 3,
+              view: "https://t.me/example",
+            },
+          ];
+
+          const addPromises = newTasks.map(task =>
+            setDoc(doc(collection(db, "tasks")), task)
+          );
+
+          await Promise.all(addPromises);
+          showToast("Tasks have been reset successfully.");
+        } catch (error) {
+          showToast("Error resetting tasks: " + error.message, "error");
+        }
+      });
+    </script>
+  </body>
+</html>
