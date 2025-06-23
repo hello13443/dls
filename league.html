@@ -124,7 +124,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
-      getFirestore, collection, onSnapshot, doc, getDoc, updateDoc, arrayUnion
+      getFirestore, collection, onSnapshot, doc, getDoc
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import {
       getAuth, onAuthStateChanged
@@ -219,6 +219,11 @@
                 Job Description
               </h3>
               <p class="text-gray-200 mb-1">${task.description || ""}</p>
+            </div>
+
+            <div class="mb-3 text-yellow-300 font-semibold text-lg">
+              Team One: <span class="text-indigo-400">${task.reward || "N/A"}</span><br/>
+              Team Two: <span class="text-indigo-400">${task.view || "N/A"}</span>
             </div>
           `;
 
