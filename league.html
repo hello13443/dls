@@ -121,123 +121,141 @@
     </a>
   </nav>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getFirestore, collection, onSnapshot, doc, getDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import {
-      getAuth, onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, onSnapshot, doc, getDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import {
+    getAuth, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
-      authDomain: "dlstournament-31ac1.firebaseapp.com",
-      projectId: "dlstournament-31ac1",
-      storageBucket: "dlstournament-31ac1.appspot.com",
-      messagingSenderId: "874377019055",
-      appId: "1:874377019055:web:6e38db2ec7f0d541d2de5a"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
+    authDomain: "dlstournament-31ac1.firebaseapp.com",
+    projectId: "dlstournament-31ac1",
+    storageBucket: "dlstournament-31ac1.appspot.com",
+    messagingSenderId: "874377019055",
+    appId: "1:874377019055:web:6e38db2ec7f0d541d2de5a"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
 
-    const tasksList = document.getElementById("tasksList");
-    let currentUser = null;
-    let userData = null;
+  const tasksList = document.getElementById("tasksList");
+  let currentUser = null;
+  let userData = null;
 
-    const toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-      background: '#1a202c',
-      color: '#fff',
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer)
-        toast.addEventListener('mouseleave', Swal.resumeTimer)
-      }
-    });
-
-    function hideLoader() {
-      const loader = document.getElementById('loadingOverlay');
-      if (loader) loader.style.display = 'none';
+  const toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    background: '#1a202c',
+    color: '#fff',
+    didOpen: (toast) => {
+      toast.addEventListener('mouseenter', Swal.stopTimer)
+      toast.addEventListener('mouseleave', Swal.resumeTimer)
     }
+  });
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Please log in to view tasks.',
-          showConfirmButton: false,
-          timer: 1500,
-          position: 'top-end'
-        });
-        setTimeout(() => {
-          window.location.href = "login.html";
-        }, 1500);
+  function hideLoader() {
+    const loader = document.getElementById('loadingOverlay');
+    if (loader) loader.style.display = 'none';
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Please log in to view tasks.',
+        showConfirmButton: false,
+        timer: 1500,
+        position: 'top-end'
+      });
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1500);
+      return;
+    }
+    currentUser = user;
+
+    const userDocRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userDocRef);
+    userData = userSnap.exists() ? userSnap.data() : { balance: 0, completedTasks: [] };
+
+    loadTasks();
+  });
+
+  function loadTasks() {
+    const tasksCol = collection(db, "tasks");
+
+    onSnapshot(tasksCol, (snapshot) => {
+      if (snapshot.empty) {
+        tasksList.innerHTML = "<p class='text-center text-gray-200 text-lg'>No tasks available right now.</p>";
+        hideLoader();
         return;
       }
-      currentUser = user;
 
-      const userDocRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userDocRef);
-      userData = userSnap.exists() ? userSnap.data() : { balance: 0, completedTasks: [] };
+      tasksList.innerHTML = "";
 
-      loadTasks();
-    });
+      snapshot.forEach(docSnap => {
+        const task = { id: docSnap.id, ...docSnap.data() };
+        const completed = userData.completedTasks?.includes(task.id);
 
-    function loadTasks() {
-      const tasksCol = collection(db, "tasks");
+        const taskDiv = document.createElement("div");
+        taskDiv.className = "bg-gradient-to-r from-yellow-400 via-green-400 to-yellow-400 rounded-2xl p-6 mb-6 shadow-lg border border-yellow-300";
 
-      onSnapshot(tasksCol, (snapshot) => {
-        if (snapshot.empty) {
-          tasksList.innerHTML = "<p class='text-center text-gray-200 text-lg'>No tasks available right now.</p>";
-          hideLoader();
-          return;
-        }
+        let taskHtml = `
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-2xl font-bold text-black" style="font-family: 'Audiowide', cursive;">${task.name}</h3>
+            <span class="text-sm text-black font-semibold italic">${task.description ? new Date(task.description).toLocaleString() : ''}</span>
+          </div>
 
-        tasksList.innerHTML = "";
-
-        snapshot.forEach(docSnap => {
-          const task = { id: docSnap.id, ...docSnap.data() };
-          const completed = userData.completedTasks?.includes(task.id);
-
-          const taskDiv = document.createElement("div");
-          taskDiv.className = "bg-gradient-to-r from-yellow-400 via-green-400 to-yellow-400 rounded-2xl p-6 mb-6 shadow-lg border border-yellow-300";
-
-          // New card design with grid layout for teams and date
-          let taskHtml = `
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-2xl font-bold text-black" style="font-family: 'Audiowide', cursive;">${task.name}</h3>
-              <span class="text-sm text-black font-semibold italic">${task.description ? new Date(task.description).toLocaleString() : ''}</span>
+          <div class="grid grid-cols-2 gap-6 bg-black bg-opacity-70 rounded-xl p-4 text-yellow-300 font-semibold text-lg">
+            <div class="flex flex-col items-center justify-center border-r border-yellow-300">
+              <i class="fas fa-futbol text-yellow-400 text-4xl mb-2"></i>
+              <span class="text-indigo-400 text-xl">${task.reward || "Team One"}</span>
             </div>
+            <div class="flex flex-col items-center justify-center">
+              <i class="fas fa-futbol text-yellow-400 text-4xl mb-2"></i>
+              <span class="text-indigo-400 text-xl">${task.view || "Team Two"}</span>
+            </div>
+          </div>
+        `;
 
-            <div class="grid grid-cols-2 gap-6 bg-black bg-opacity-70 rounded-xl p-4 text-yellow-300 font-semibold text-lg">
-              <div class="flex flex-col items-center justify-center border-r border-yellow-300">
-                <i class="fas fa-futbol text-yellow-400 text-4xl mb-2"></i>
-                <span class="text-indigo-400 text-xl">${task.reward || "Team One"}</span>
-              </div>
-              <div class="flex flex-col items-center justify-center">
-                <i class="fas fa-futbol text-yellow-400 text-4xl mb-2"></i>
-                <span class="text-indigo-400 text-xl">${task.view || "Team Two"}</span>
+        // 🔽 Add Option Display Below Teams
+        if (task.optionTitle && task.optionOne && task.optionTwo && task.pointOne && task.pointTwo) {
+          taskHtml += `
+            <div class="mt-4 bg-black bg-opacity-70 rounded-xl p-4 text-white border border-yellow-300">
+              <p class="text-lg font-bold text-yellow-300 mb-2">${task.optionTitle}</p>
+              <div class="flex justify-between">
+                <div>
+                  <p class="text-indigo-300 font-semibold">${task.optionOne}</p>
+                  <p class="text-sm text-gray-300">Point: ${task.pointOne}</p>
+                </div>
+                <div>
+                  <p class="text-indigo-300 font-semibold">${task.optionTwo}</p>
+                  <p class="text-sm text-gray-300">Point: ${task.pointTwo}</p>
+                </div>
               </div>
             </div>
           `;
+        }
 
-          if (completed) {
-            taskHtml += `<p class="mt-4 px-4 py-2 bg-green-600 text-white rounded text-center font-semibold">✔ Completed Job</p>`;
-          }
+        if (completed) {
+          taskHtml += `<p class="mt-4 px-4 py-2 bg-green-600 text-white rounded text-center font-semibold">✔ Completed Job</p>`;
+        }
 
-          taskDiv.innerHTML = taskHtml;
-          tasksList.appendChild(taskDiv);
-        });
-
-        hideLoader();
+        taskDiv.innerHTML = taskHtml;
+        tasksList.appendChild(taskDiv);
       });
-    }
-  </script>
+
+      hideLoader();
+    });
+  }
+</script>
 </body>
 </html>
