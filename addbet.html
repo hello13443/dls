@@ -52,14 +52,6 @@
           </div>
         </form>
       </section>
-
-      <!-- Matches List Section -->
-      <section>
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">All Matches</h2>
-        <div id="tasksList" class="space-y-4" role="list" aria-live="polite">
-          <p class="text-center text-indigo-500 italic">Loading matches...</p>
-        </div>
-      </section>
     </main>
 
     <script type="module">
@@ -68,9 +60,7 @@
         getFirestore,
         collection,
         doc,
-        setDoc,
-        deleteDoc,
-        onSnapshot
+        setDoc
       } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -88,7 +78,6 @@
       const auth = getAuth(app);
 
       const tasksCol = collection(db, "tasks");
-      const tasksList = document.getElementById("tasksList");
       const taskForm = document.getElementById("taskForm");
       const taskIdInput = document.getElementById("taskId");
       const taskNameInput = document.getElementById("taskName");
@@ -117,74 +106,8 @@
           }).then(() => {
             window.location.href = "login.html";
           });
-          return;
         }
-        loadTasksRealtime();
       });
-
-      function loadTasksRealtime() {
-        onSnapshot(tasksCol, (snapshot) => {
-          if (snapshot.empty) {
-            tasksList.innerHTML = '<p class="text-center text-indigo-500 italic">No matches found.</p>';
-            return;
-          }
-
-          tasksList.innerHTML = "";
-          snapshot.forEach((docSnap) => {
-            const task = { id: docSnap.id, ...docSnap.data() };
-
-            const taskDiv = document.createElement("div");
-            taskDiv.className = "p-6 bg-white rounded-2xl shadow-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4";
-
-            const info = document.createElement("div");
-            info.className = "flex-1 min-w-0";
-            info.innerHTML = `
-              <p class="text-lg font-semibold text-indigo-700 truncate">${task.name}</p>
-              <p class="text-sm text-gray-600 mt-1">${task.description || ""}</p>
-              <p class="mt-2 font-medium text-indigo-600">Team One: ${task.reward || ""}</p>
-              ${task.view ? `<p class="mt-1">Team Two: ${task.view}</p>` : ""}
-            `;
-
-            const controls = document.createElement("div");
-            controls.className = "flex gap-2 sm:gap-3";
-
-            const editBtn = document.createElement("button");
-            editBtn.className = "bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-300";
-            editBtn.innerHTML = `<i class="fas fa-edit"></i> Edit`;
-            editBtn.title = "Edit Match";
-            editBtn.onclick = () => {
-              taskIdInput.value = task.id;
-              taskNameInput.value = task.name;
-              taskDescInput.value = task.description || "";
-              taskRewardInput.value = task.reward;
-              taskViewInput.value = task.view || "";
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            };
-
-            const deleteBtn = document.createElement("button");
-            deleteBtn.className = "bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-red-400";
-            deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Delete`;
-            deleteBtn.title = "Delete Match";
-            deleteBtn.onclick = async () => {
-              if (confirm(`Delete match "${task.name}"? This action cannot be undone.`)) {
-                try {
-                  await deleteDoc(doc(db, "tasks", task.id));
-                  showToast("Match deleted.");
-                } catch (error) {
-                  showToast("Error deleting match: " + error.message, "error");
-                }
-              }
-            };
-
-            controls.appendChild(editBtn);
-            controls.appendChild(deleteBtn);
-
-            taskDiv.appendChild(info);
-            taskDiv.appendChild(controls);
-            tasksList.appendChild(taskDiv);
-          });
-        });
-      }
 
       taskForm.addEventListener("submit", async (e) => {
         e.preventDefault();
