@@ -34,8 +34,10 @@
       getFirestore,
       collection,
       doc,
+      updateDoc,
       deleteDoc,
-      onSnapshot
+      onSnapshot,
+      arrayUnion
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -94,6 +96,7 @@
 
           const taskDiv = document.createElement("div");
           taskDiv.className = "p-6 bg-white rounded-2xl shadow-lg flex flex-col gap-4";
+          taskDiv.id = `task-${task.id}`;
 
           const info = document.createElement("div");
           info.innerHTML = `
@@ -103,6 +106,14 @@
               <span class="text-green-600">${task.reward || "Team One"}</span>
               <span class="mx-2 font-bold text-gray-500">vs</span>
               <span class="text-red-600">${task.view || "Team Two"}</span>
+            </div>
+            <div class="mt-3 space-y-1" id="options-${task.id}">
+              ${(task.options || []).map(opt => `
+                <div class="text-sm text-gray-700 border p-2 rounded-md">
+                  <strong>${opt.title}</strong><br>
+                  ${opt.one} (${opt.pointOne}) vs ${opt.two} (${opt.pointTwo})
+                </div>
+              `).join('')}
             </div>
           `;
 
@@ -156,23 +167,42 @@
       });
     }
 
-    window.addOption = function(taskId) {
+    window.addOption = async function(taskId) {
       const title = document.getElementById(`title-${taskId}`).value.trim();
       const one = document.getElementById(`one-${taskId}`).value.trim();
       const two = document.getElementById(`two-${taskId}`).value.trim();
-      const pointOne = document.getElementById(`pointOne-${taskId}`).value.trim();
-      const pointTwo = document.getElementById(`pointTwo-${taskId}`).value.trim();
+      const pointOne = parseFloat(document.getElementById(`pointOne-${taskId}`).value.trim());
+      const pointTwo = parseFloat(document.getElementById(`pointTwo-${taskId}`).value.trim());
 
-      if (!title || !one || !two || !pointOne || !pointTwo) {
+      if (!title || !one || !two || isNaN(pointOne) || isNaN(pointTwo)) {
         showToast("Please fill in all fields.", "warning");
         return;
       }
 
-      console.log("Option submitted:", { taskId, title, one, two, pointOne, pointTwo });
-      showToast("Option added.");
-      
-      // Remove the form
-      document.getElementById(`title-${taskId}`).closest('.option-form').remove();
+      const option = { title, one, two, pointOne, pointTwo };
+
+      try {
+        await updateDoc(doc(db, "tasks", taskId), {
+          options: arrayUnion(option)
+        });
+        showToast("Option added.");
+
+        // Add to UI instantly
+        const optionsDiv = document.getElementById(`options-${taskId}`);
+        const optHTML = document.createElement("div");
+        optHTML.className = "text-sm text-gray-700 border p-2 rounded-md";
+        optHTML.innerHTML = `
+          <strong>${title}</strong><br>
+          ${one} (${pointOne}) vs ${two} (${pointTwo})
+        `;
+        optionsDiv.appendChild(optHTML);
+
+        // Remove form
+        document.getElementById(`title-${taskId}`).closest('.option-form').remove();
+      } catch (error) {
+        showToast("Failed to add option.", "error");
+        console.error(error);
+      }
     };
   </script>
 </body>
