@@ -94,6 +94,7 @@
 
           const taskDiv = document.createElement("div");
           taskDiv.className = "p-6 bg-white rounded-2xl shadow-lg flex flex-col gap-4";
+          taskDiv.id = `task-${task.id}`;
 
           const info = document.createElement("div");
           info.innerHTML = `
@@ -105,6 +106,10 @@
               <span class="text-red-600">${task.view || "Team Two"}</span>
             </div>
           `;
+
+          const optionsList = document.createElement("div");
+          optionsList.className = "options space-y-2";
+          optionsList.id = `options-${task.id}`;
 
           const controls = document.createElement("div");
           controls.className = "flex flex-wrap gap-2";
@@ -150,6 +155,7 @@
           controls.appendChild(deleteBtn);
 
           taskDiv.appendChild(info);
+          taskDiv.appendChild(optionsList);
           taskDiv.appendChild(controls);
           tasksList.appendChild(taskDiv);
         });
@@ -168,10 +174,17 @@
         return;
       }
 
-      console.log("Option submitted:", { taskId, title, one, two, pointOne, pointTwo });
+      const optionHTML = `
+        <div class="bg-indigo-50 border-l-4 border-indigo-500 text-indigo-700 p-3 rounded-md shadow">
+          <p class="font-semibold">${title}</p>
+          <p class="text-sm mt-1">${one} (${pointOne} pts) vs ${two} (${pointTwo} pts)</p>
+        </div>
+      `;
+
+      const optionsList = document.getElementById(`options-${taskId}`);
+      optionsList.insertAdjacentHTML("beforeend", optionHTML);
+
       showToast("Option added.");
-      
-      // Remove the form
       document.getElementById(`title-${taskId}`).closest('.option-form').remove();
     };
   </script>
