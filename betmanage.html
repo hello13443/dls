@@ -67,38 +67,6 @@
       });
     }
 
-    function showOptionPopup(taskId) {
-      Swal.fire({
-        title: 'Add Option',
-        html: `
-          <input id="optionTitle" class="swal2-input" placeholder="Option Title">
-          <input id="optionOne" class="swal2-input" placeholder="Option One">
-          <input id="optionTwo" class="swal2-input" placeholder="Option Two">
-          <input id="pointOne" class="swal2-input" placeholder="Point One">
-          <input id="pointTwo" class="swal2-input" placeholder="Point Two">
-        `,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: 'Add',
-        preConfirm: () => {
-          const title = document.getElementById('optionTitle').value.trim();
-          const one = document.getElementById('optionOne').value.trim();
-          const two = document.getElementById('optionTwo').value.trim();
-          const pointOne = document.getElementById('pointOne').value.trim();
-          const pointTwo = document.getElementById('pointTwo').value.trim();
-
-          if (!title || !one || !two || !pointOne || !pointTwo) {
-            Swal.showValidationMessage(`Please fill in all fields.`);
-            return false;
-          }
-
-          // Here you can process/save the data
-          console.log({ taskId, title, one, two, pointOne, pointTwo });
-          showToast("Option added.");
-        }
-      });
-    }
-
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         Swal.fire({
@@ -125,10 +93,9 @@
           const task = { id: docSnap.id, ...docSnap.data() };
 
           const taskDiv = document.createElement("div");
-          taskDiv.className = "p-6 bg-white rounded-2xl shadow-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4";
+          taskDiv.className = "p-6 bg-white rounded-2xl shadow-lg flex flex-col gap-4";
 
           const info = document.createElement("div");
-          info.className = "flex-1 min-w-0";
           info.innerHTML = `
             <p class="text-lg font-semibold text-indigo-700 truncate">${task.name}</p>
             <p class="text-sm text-gray-600 mt-1">${task.description || ""}</p>
@@ -140,24 +107,41 @@
           `;
 
           const controls = document.createElement("div");
-          controls.className = "flex flex-col gap-2 sm:gap-3";
+          controls.className = "flex flex-wrap gap-2";
 
           const addOptionBtn = document.createElement("button");
-          addOptionBtn.className = "bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400";
+          addOptionBtn.className = "bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-white";
           addOptionBtn.innerHTML = `<i class="fas fa-plus-circle mr-1"></i> Add Option`;
-          addOptionBtn.onclick = () => showOptionPopup(task.id);
+          addOptionBtn.onclick = () => {
+            if (taskDiv.querySelector(".option-form")) return;
+
+            const form = document.createElement("div");
+            form.className = "option-form mt-4 bg-gray-100 p-4 rounded-xl space-y-2";
+
+            form.innerHTML = `
+              <input type="text" placeholder="Option Title" class="w-full px-3 py-2 rounded border border-gray-300" id="title-${task.id}">
+              <input type="text" placeholder="Option One" class="w-full px-3 py-2 rounded border border-gray-300" id="one-${task.id}">
+              <input type="text" placeholder="Option Two" class="w-full px-3 py-2 rounded border border-gray-300" id="two-${task.id}">
+              <input type="number" placeholder="Point One" class="w-full px-3 py-2 rounded border border-gray-300" id="pointOne-${task.id}">
+              <input type="number" placeholder="Point Two" class="w-full px-3 py-2 rounded border border-gray-300" id="pointTwo-${task.id}">
+              <div class="flex gap-2">
+                <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onclick="addOption('${task.id}')">Add</button>
+                <button class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded" onclick="this.closest('.option-form').remove()">Cancel</button>
+              </div>
+            `;
+            taskDiv.appendChild(form);
+          };
 
           const deleteBtn = document.createElement("button");
-          deleteBtn.className = "bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-red-400";
+          deleteBtn.className = "bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-white";
           deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Delete`;
-          deleteBtn.title = "Delete Match";
           deleteBtn.onclick = async () => {
-            if (confirm(`Delete match "${task.name}"? This action cannot be undone.`)) {
+            if (confirm(`Delete match "${task.name}"?`)) {
               try {
                 await deleteDoc(doc(db, "tasks", task.id));
                 showToast("Match deleted.");
               } catch (error) {
-                showToast("Error deleting match: " + error.message, "error");
+                showToast("Error: " + error.message, "error");
               }
             }
           };
@@ -171,6 +155,25 @@
         });
       });
     }
+
+    window.addOption = function(taskId) {
+      const title = document.getElementById(`title-${taskId}`).value.trim();
+      const one = document.getElementById(`one-${taskId}`).value.trim();
+      const two = document.getElementById(`two-${taskId}`).value.trim();
+      const pointOne = document.getElementById(`pointOne-${taskId}`).value.trim();
+      const pointTwo = document.getElementById(`pointTwo-${taskId}`).value.trim();
+
+      if (!title || !one || !two || !pointOne || !pointTwo) {
+        showToast("Please fill in all fields.", "warning");
+        return;
+      }
+
+      console.log("Option submitted:", { taskId, title, one, two, pointOne, pointTwo });
+      showToast("Option added.");
+      
+      // Remove the form
+      document.getElementById(`title-${taskId}`).closest('.option-form').remove();
+    };
   </script>
 </body>
 </html>
