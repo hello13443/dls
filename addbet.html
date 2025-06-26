@@ -61,7 +61,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
-      getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot
+      getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -114,12 +114,18 @@
             <p class="text-sm text-gray-600 mt-1">${task.description || ""}</p>
             <p class="mt-2 font-medium text-indigo-600">Team One: ${task.reward || ""}</p>
             ${task.view ? `<p class="mt-1">Team Two: ${task.view}</p>` : ""}
+            ${task.bet ? `
+              <div class='bet-info mt-4 text-sm bg-gray-50 p-3 rounded-xl border'>
+                <p><strong>Bet Title:</strong> ${task.bet.title}</p>
+                <p><strong>Option 1:</strong> ${task.bet.option1} (${task.bet.point1} pts)</p>
+                <p><strong>Option 2:</strong> ${task.bet.option2} (${task.bet.point2} pts)</p>
+              </div>` : ""}
           `;
           const controls = document.createElement("div");
           controls.className = "flex gap-2 sm:gap-3";
 
           const editBtn = document.createElement("button");
-          editBtn.className = "bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-300";
+          editBtn.className = "bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded-xl text-white transition shadow-md";
           editBtn.innerHTML = `<i class="fas fa-edit"></i> Edit`;
           editBtn.onclick = () => {
             taskIdInput.value = task.id;
@@ -131,7 +137,7 @@
           };
 
           const deleteBtn = document.createElement("button");
-          deleteBtn.className = "bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-red-400";
+          deleteBtn.className = "bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-white transition shadow-md";
           deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Delete`;
           deleteBtn.onclick = async () => {
             if (confirm(`Delete match "${task.name}"? This action cannot be undone.`)) {
@@ -145,7 +151,7 @@
           };
 
           const betBtn = document.createElement("button");
-          betBtn.className = "bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400";
+          betBtn.className = "bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-white transition shadow-md";
           betBtn.innerHTML = `<i class="fas fa-coins"></i> Bet`;
           betBtn.onclick = () => {
             const modal = document.createElement("div");
@@ -162,10 +168,9 @@
                 </div>
                 <div class='mt-5 flex justify-end gap-3'>
                   <button class='bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg' onclick='this.closest(".fixed").remove()'>Cancel</button>
-                  <button class='bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg' onclick='saveBet(this)'>Save</button>
+                  <button class='bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg' onclick='window.saveBet(this, "${task.id}")'>Save</button>
                 </div>
               </div>`;
-            modal.dataset.cardId = task.id;
             document.body.appendChild(modal);
           };
 
@@ -196,25 +201,27 @@
       }
     });
 
-    window.saveBet = (btn) => {
+    window.saveBet = async (btn, taskId) => {
       const modal = btn.closest('.fixed');
       const betTitle = modal.querySelector('#betTitle').value.trim();
       const option1 = modal.querySelector('#option1').value.trim();
       const option2 = modal.querySelector('#option2').value.trim();
       const point1 = modal.querySelector('#point1').value.trim();
       const point2 = modal.querySelector('#point2').value.trim();
-      if (!betTitle || !option1 || !option2 || !point1 || !point2) return showToast("Please fill all fields", "warning");
-      const card = [...document.querySelectorAll('#tasksList > div')].find(div => div.contains(modal));
-      const existing = card.querySelector(".bet-info");
-      const html = `<div class='bet-info mt-4 text-sm bg-gray-50 p-3 rounded-xl border'>
-        <p><strong>Bet Title:</strong> ${betTitle}</p>
-        <p><strong>Option 1:</strong> ${option1} (${point1} pts)</p>
-        <p><strong>Option 2:</strong> ${option2} (${point2} pts)</p>
-      </div>`;
-      if (existing) existing.outerHTML = html;
-      else card.querySelector("div").insertAdjacentHTML("beforeend", html);
-      modal.remove();
-      showToast("Bet info added");
+
+      if (!betTitle || !option1 || !option2 || !point1 || !point2) {
+        return showToast("Please fill all fields", "warning");
+      }
+
+      try {
+        await updateDoc(doc(db, "tasks", taskId), {
+          bet: { title: betTitle, option1, option2, point1, point2 }
+        });
+        modal.remove();
+        showToast("Bet info saved");
+      } catch (err) {
+        showToast("Failed to save bet info: " + err.message, "error");
+      }
     };
   </script>
 </body>
