@@ -109,11 +109,11 @@
         snapshot.forEach(docSnap => {
           const task = { id: docSnap.id, ...docSnap.data() };
           const completed = userData.completedTasks?.includes(task.id);
-          const bet = task.bet || {};
+
           const matchHTML = `
             <div class="bg-[#25114d] rounded-xl p-4 mb-5 text-white shadow-md border border-purple-700">
               <div class="flex justify-between items-center mb-2 text-sm text-gray-300">
-                <span>🏏${task.name}</span>
+                <span>🏏 ${task.name}</span>
                 <span>🕒 ${task.description ? new Date(task.description).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
               </div>
               <div class="flex justify-between items-center py-2">
@@ -128,15 +128,15 @@
                 </div>
               </div>
               <div class="bg-[#3b1f73] p-3 rounded-lg mt-3 text-sm">
-                <p class="mb-2">${task.bet.title}</p>
+                <p class="mb-2">${task.betTitle || "No Bet Title"}</p>
                 <div class="flex justify-between text-center">
                   <div class="flex-1">
-                    <p>${bet.option2 || '-'}</p>
-                    <p class="bg-blue-600 py-1 px-2 rounded mt-1">${bet.odds1 || '-'}</p>
+                    <p>${task.option2 || '-'}</p>
+                    <p class="bg-blue-600 py-1 px-2 rounded mt-1">${task.odds2 || '-'}</p>
                   </div>
                   <div class="flex-1">
-                    <p>${bet.option1 || '-'}</p>
-                    <p class="bg-blue-600 py-1 px-2 rounded mt-1">${bet.odds2 || '-'}</p>
+                    <p>${task.option1 || '-'}</p>
+                    <p class="bg-blue-600 py-1 px-2 rounded mt-1">${task.odds1 || '-'}</p>
                   </div>
                 </div>
               </div>
