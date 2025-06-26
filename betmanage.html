@@ -30,10 +30,19 @@
     <div class="bg-white w-full max-w-md rounded-lg p-6 space-y-4 relative">
       <h3 class="text-lg font-bold mb-2">Add Bet Info</h3>
       <input type="text" id="popup-betTitle" placeholder="Bet Title" class="w-full border px-4 py-2 rounded" />
-      <input type="text" id="popup-option1" placeholder="Option 1" class="w-full border px-4 py-2 rounded" />
-      <input type="text" id="popup-option2" placeholder="Option 2" class="w-full border px-4 py-2 rounded" />
-      <input type="text" id="popup-odds1" placeholder="Odds 1" class="w-full border px-4 py-2 rounded" />
-      <input type="text" id="popup-odds2" placeholder="Odds 2" class="w-full border px-4 py-2 rounded" />
+      
+      <!-- Option 1 + Odds 1 -->
+      <div class="flex gap-2">
+        <input type="text" id="popup-option1" placeholder="Option 1" class="w-1/2 border px-4 py-2 rounded" />
+        <input type="text" id="popup-odds1" placeholder="Odds 1" class="w-1/2 border px-4 py-2 rounded" />
+      </div>
+
+      <!-- Option 2 + Odds 2 -->
+      <div class="flex gap-2">
+        <input type="text" id="popup-option2" placeholder="Option 2" class="w-1/2 border px-4 py-2 rounded" />
+        <input type="text" id="popup-odds2" placeholder="Odds 2" class="w-1/2 border px-4 py-2 rounded" />
+      </div>
+
       <div class="flex justify-end gap-2">
         <button onclick="closeModal()" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">Cancel</button>
         <button id="saveBetBtn" class="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">Save</button>
@@ -82,7 +91,6 @@
           const div = document.createElement("div");
           div.className = "bg-white rounded-xl shadow-md p-4";
 
-          // Build bets list HTML if bets exist
           let betsHTML = "";
           if (Array.isArray(data.bets) && data.bets.length > 0) {
             betsHTML = `<div class="mt-4 border-t pt-3">
@@ -103,7 +111,6 @@
             <p class="font-bold text-indigo-700">${data.name}</p>
             <p class="text-sm text-gray-600">${data.description || ""}</p>
 
-            <!-- Vs Design -->
             <div class="my-2 flex items-center justify-center gap-2 text-gray-800 font-semibold">
               <span>${data.reward}</span>
               <span class="text-red-600 font-bold">VS</span>
