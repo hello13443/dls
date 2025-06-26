@@ -1,214 +1,217 @@
+<!-- 🟡 Only the changed/added sections are commented to keep the file compact -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Add Bet Match</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body class="bg-gray-100 min-h-screen">
-  <header class="bg-white shadow-md relative">
-    <div class="max-w-7xl mx-auto px-4 py-3 relative flex items-center justify-center">
-      <p onclick="window.location.href='/admin.html'" class="absolute left-4 text-gray-700 cursor-pointer">
-        <i class="fas fa-arrow-left text-2xl"></i>
-      </p>
-      <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
-    </div>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Add Bet Match</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
 
-  <main class="max-w-4xl mx-auto px-4 py-6">
-    <!-- Match Form Section -->
-    <section class="bg-white rounded-xl shadow-md p-6 mb-10">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Add / Edit Match</h2>
-      <form id="taskForm" class="space-y-5">
-        <input type="hidden" id="taskId" />
-        <div><label for="taskName" class="block mb-1 font-medium">Match Title</label><input type="text" id="taskName" required class="w-full px-4 py-2 border rounded-lg" /></div>
-        <div><label for="taskDesc" class="block mb-1 font-medium">Date Time</label><input type="datetime-local" id="taskDesc" class="w-full px-4 py-2 border rounded-lg" /></div>
-        <div><label for="taskReward" class="block mb-1 font-medium">Team One</label><input type="text" id="taskReward" required class="w-full px-4 py-2 border rounded-lg" /></div>
-        <div><label for="taskView" class="block mb-1 font-medium">Team Two</label><input type="text" id="taskView" class="w-full px-4 py-2 border rounded-lg" /></div>
-        <div><label for="betTitle" class="block mb-1 font-medium">Bet Title</label><input type="text" id="betTitle" class="w-full px-4 py-2 border rounded-lg" /></div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label for="option1" class="block mb-1 font-medium">Option 1</label><input type="text" id="option1" class="w-full px-4 py-2 border rounded-lg" /></div>
-          <div><label for="option2" class="block mb-1 font-medium">Option 2</label><input type="text" id="option2" class="w-full px-4 py-2 border rounded-lg" /></div>
-          <div><label for="odds1" class="block mb-1 font-medium">Odds 1</label><input type="text" id="odds1" class="w-full px-4 py-2 border rounded-lg" /></div>
-          <div><label for="odds2" class="block mb-1 font-medium">Odds 2</label><input type="text" id="odds2" class="w-full px-4 py-2 border rounded-lg" /></div>
-        </div>
-        <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg">Save Match</button>
-      </form>
-    </section>
+    <!-- 🔵 Modal for Adding Bet Info -->
+    <div id="betModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+      <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+        <h3 class="text-lg font-bold mb-4">Add Bet Info</h3>
+        <form id="betForm" class="space-y-4">
+          <input type="hidden" id="modalTaskId">
+          <div>
+            <label class="block mb-1 font-medium">Bet Title</label>
+            <input type="text" id="modalBetTitle" class="w-full px-4 py-2 border rounded-lg" />
+          </div>
+          <div>
+            <label class="block mb-1 font-medium">Option 1</label>
+            <input type="text" id="modalOption1" class="w-full px-4 py-2 border rounded-lg" />
+          </div>
+          <div>
+            <label class="block mb-1 font-medium">Option 2</label>
+            <input type="text" id="modalOption2" class="w-full px-4 py-2 border rounded-lg" />
+          </div>
+          <div>
+            <label class="block mb-1 font-medium">Odds 1</label>
+            <input type="text" id="modalOdds1" class="w-full px-4 py-2 border rounded-lg" />
+          </div>
+          <div>
+            <label class="block mb-1 font-medium">Odds 2</label>
+            <input type="text" id="modalOdds2" class="w-full px-4 py-2 border rounded-lg" />
+          </div>
+          <div class="flex justify-end gap-2">
+            <button type="button" onclick="closeBetModal()" class="bg-gray-300 px-4 py-2 rounded-lg">Cancel</button>
+            <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-    <!-- Matches List Section -->
-    <section>
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">All Matches</h2>
-      <div id="matchList" class="space-y-4" role="list" aria-live="polite">
-        <p class="text-center text-indigo-500 italic">Loading matches...</p>
-      </div>
-    </section>
-  </main>
+    <!-- 🔁 MATCH CARD LOOP: Add Bet Info button added inside -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        doc,
+        setDoc,
+        deleteDoc,
+        onSnapshot,
+        updateDoc
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      doc,
-      setDoc,
-      deleteDoc,
-      onSnapshot
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
+        authDomain: "dlstournament-31ac1.firebaseapp.com",
+        projectId: "dlstournament-31ac1",
+        storageBucket: "dlstournament-31ac1.appspot.com",
+        messagingSenderId: "874377019055",
+        appId: "1:874377019055:web:6e38db2ec7f0d541d2de5a"
+      };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
-      authDomain: "dlstournament-31ac1.firebaseapp.com",
-      projectId: "dlstournament-31ac1",
-      storageBucket: "dlstournament-31ac1.appspot.com",
-      messagingSenderId: "874377019055",
-      appId: "1:874377019055:web:6e38db2ec7f0d541d2de5a"
-    };
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const tasksCol = collection(db, "tasks");
+      const tasksCol = collection(db, "tasks");
+      const tasksList = document.getElementById("matchList");
 
-    const taskForm = document.getElementById("taskForm");
-    const tasksList = document.getElementById("matchList");
+      // Modal references
+      const modal = document.getElementById("betModal");
+      const modalTaskId = document.getElementById("modalTaskId");
+      const modalBetTitle = document.getElementById("modalBetTitle");
+      const modalOption1 = document.getElementById("modalOption1");
+      const modalOption2 = document.getElementById("modalOption2");
+      const modalOdds1 = document.getElementById("modalOdds1");
+      const modalOdds2 = document.getElementById("modalOdds2");
 
-    const taskIdInput = document.getElementById("taskId");
-    const taskNameInput = document.getElementById("taskName");
-    const taskDescInput = document.getElementById("taskDesc");
-    const taskRewardInput = document.getElementById("taskReward");
-    const taskViewInput = document.getElementById("taskView");
-    const betTitleInput = document.getElementById("betTitle");
-    const option1Input = document.getElementById("option1");
-    const option2Input = document.getElementById("option2");
-    const odds1Input = document.getElementById("odds1");
-    const odds2Input = document.getElementById("odds2");
+      function openBetModal(task) {
+        modalTaskId.value = task.id;
+        modalBetTitle.value = task.betTitle || "";
+        modalOption1.value = task.option1 || "";
+        modalOption2.value = task.option2 || "";
+        modalOdds1.value = task.odds1 || "";
+        modalOdds2.value = task.odds2 || "";
+        modal.classList.remove("hidden");
+      }
 
-    function showToast(message, icon = "success") {
-      Swal.fire({ toast: true, position: "top-end", showConfirmButton: false, timer: 3000, icon, title: message });
-    }
+      window.closeBetModal = function () {
+        modal.classList.add("hidden");
+      }
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        Swal.fire({ icon: "warning", title: "Please log in first." }).then(() => window.location.href = "login.html");
-      } else {
-        loadTasksRealtime();
-      }
-    });
+      document.getElementById("betForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = modalTaskId.value;
+        const data = {
+          betTitle: modalBetTitle.value.trim(),
+          option1: modalOption1.value.trim(),
+          option2: modalOption2.value.trim(),
+          odds1: modalOdds1.value.trim(),
+          odds2: modalOdds2.value.trim()
+        };
 
-    function loadTasksRealtime() {
-      onSnapshot(tasksCol, (snapshot) => {
-        tasksList.innerHTML = snapshot.empty ? '<p class="text-center text-indigo-500 italic">No matches found.</p>' : "";
+        try {
+          await updateDoc(doc(db, "tasks", id), data);
+          showToast("Bet Info updated.");
+          closeBetModal();
+        } catch (error) {
+          showToast("Error: " + error.message, "error");
+        }
+      });
 
-        snapshot.forEach((docSnap) => {
-          const task = { id: docSnap.id, ...docSnap.data() };
-          const div = document.createElement("div");
-          div.className = "p-6 bg-white rounded-2xl shadow-lg";
+      function showToast(message, icon = "success") {
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          icon: icon,
+          title: message,
+        });
+      }
 
-          div.innerHTML = `
-            <p class="text-lg font-semibold text-indigo-700">${task.name}</p>
-            <p class="text-sm text-gray-600">${task.description || ""}</p>
-            <p class="text-indigo-600">Team One: ${task.reward || ""}</p>
-            ${task.view ? `<p>Team Two: ${task.view}</p>` : ""}
-            ${task.betTitle ? `<p class="mt-2 text-gray-800 font-medium">Bet Title: ${task.betTitle}</p>` : ""}
-            ${task.option1 ? `<p>Option 1: ${task.option1} (Odds: ${task.odds1 || "-"})</p>` : ""}
-            ${task.option2 ? `<p>Option 2: ${task.option2} (Odds: ${task.odds2 || "-"})</p>` : ""}
-            <div class="mt-4 flex flex-wrap gap-2">
-              <button class="bg-yellow-500 text-white px-4 py-2 rounded" onclick="editMatch('${task.id}', ${JSON.stringify(task).replace(/"/g, '&quot;')})">
-                <i class="fas fa-edit"></i> Edit
-              </button>
-              <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="addBetPopup('${task.id}')">
-                <i class="fas fa-plus-circle"></i> Add Bet Info
-              </button>
-              <button class="bg-red-600 text-white px-4 py-2 rounded" onclick="deleteMatch('${task.id}', '${task.name}')">
-                <i class="fas fa-trash"></i> Delete
-              </button>
-            </div>
-          `;
-          tasksList.appendChild(div);
-        });
-      });
-    }
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          Swal.fire({
+            icon: "warning",
+            title: "Please log in first.",
+            confirmButtonText: "OK"
+          }).then(() => {
+            window.location.href = "login.html";
+          });
+          return;
+        }
+        loadTasksRealtime();
+      });
 
-    window.editMatch = (id, task) => {
-      taskIdInput.value = id;
-      taskNameInput.value = task.name || "";
-      taskDescInput.value = task.description || "";
-      taskRewardInput.value = task.reward || "";
-      taskViewInput.value = task.view || "";
-      betTitleInput.value = task.betTitle || "";
-      option1Input.value = task.option1 || "";
-      option2Input.value = task.option2 || "";
-      odds1Input.value = task.odds1 || "";
-      odds2Input.value = task.odds2 || "";
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    };
+      function loadTasksRealtime() {
+        onSnapshot(tasksCol, (snapshot) => {
+          tasksList.innerHTML = snapshot.empty
+            ? '<p class="text-center text-indigo-500 italic">No matches found.</p>'
+            : "";
 
-    window.addBetPopup = async (id) => {
-      const { value: formValues } = await Swal.fire({
-        title: "Add Bet Info",
-        html: `
-          <input id="swal-bet" class="swal2-input" placeholder="Bet Title">
-          <input id="swal-op1" class="swal2-input" placeholder="Option 1">
-          <input id="swal-op2" class="swal2-input" placeholder="Option 2">
-          <input id="swal-odds1" class="swal2-input" placeholder="Odds 1">
-          <input id="swal-odds2" class="swal2-input" placeholder="Odds 2">
-        `,
-        focusConfirm: false,
-        preConfirm: () => {
-          return {
-            betTitle: document.getElementById('swal-bet').value,
-            option1: document.getElementById('swal-op1').value,
-            option2: document.getElementById('swal-op2').value,
-            odds1: document.getElementById('swal-odds1').value,
-            odds2: document.getElementById('swal-odds2').value
-          };
-        }
-      });
+          snapshot.forEach((docSnap) => {
+            const task = { id: docSnap.id, ...docSnap.data() };
+            const div = document.createElement("div");
+            div.className = "p-6 bg-white rounded-2xl shadow-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4";
 
-      if (formValues) {
-        await setDoc(doc(db, "tasks", id), formValues, { merge: true });
-        showToast("Bet info added.");
-      }
-    };
+            const info = document.createElement("div");
+            info.innerHTML = `
+              <p class="text-lg font-semibold text-indigo-700">${task.name}</p>
+              <p class="text-sm text-gray-600">${task.description || ""}</p>
+              <p class="mt-2 text-indigo-600">Team One: ${task.reward}</p>
+              ${task.view ? `<p>Team Two: ${task.view}</p>` : ""}
+              ${task.betTitle ? `<p class="mt-2 font-medium text-gray-800">Bet Title: ${task.betTitle}</p>` : ""}
+              ${task.option1 ? `<p>Option 1: ${task.option1} (Odds: ${task.odds1 || "-"})</p>` : ""}
+              ${task.option2 ? `<p>Option 2: ${task.option2} (Odds: ${task.odds2 || "-"})</p>` : ""}
+            `;
 
-    window.deleteMatch = async (id, name) => {
-      if (confirm(`Delete match "${name}"?`)) {
-        await deleteDoc(doc(db, "tasks", id));
-        showToast("Match deleted.");
-      }
-    };
+            const controls = document.createElement("div");
+            controls.className = "flex flex-wrap gap-2";
 
-    taskForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const id = taskIdInput.value.trim();
-      const data = {
-        name: taskNameInput.value.trim(),
-        description: taskDescInput.value.trim(),
-        reward: taskRewardInput.value.trim(),
-        view: taskViewInput.value.trim(),
-        betTitle: betTitleInput.value.trim(),
-        option1: option1Input.value.trim(),
-        option2: option2Input.value.trim(),
-        odds1: odds1Input.value.trim(),
-        odds2: odds2Input.value.trim(),
-      };
+            const editBtn = document.createElement("button");
+            editBtn.className = "bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded-xl text-white";
+            editBtn.innerHTML = `<i class="fas fa-edit"></i> Edit`;
+            editBtn.onclick = () => {
+              document.getElementById("taskId").value = task.id;
+              document.getElementById("taskName").value = task.name;
+              document.getElementById("taskDesc").value = task.description || "";
+              document.getElementById("taskReward").value = task.reward;
+              document.getElementById("taskView").value = task.view || "";
+              document.getElementById("betTitle").value = task.betTitle || "";
+              document.getElementById("option1").value = task.option1 || "";
+              document.getElementById("option2").value = task.option2 || "";
+              document.getElementById("odds1").value = task.odds1 || "";
+              document.getElementById("odds2").value = task.odds2 || "";
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            };
 
-      if (!data.name || !data.reward) return showToast("Match title and Team One are required.", "warning");
+            const betInfoBtn = document.createElement("button");
+            betInfoBtn.className = "bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-white";
+            betInfoBtn.innerHTML = `<i class="fas fa-plus"></i> Add Bet Info`;
+            betInfoBtn.onclick = () => openBetModal(task);
 
-      await (id
-        ? setDoc(doc(db, "tasks", id), data, { merge: true })
-        : setDoc(doc(collection(db, "tasks")), data));
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-white";
+            deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Delete`;
+            deleteBtn.onclick = async () => {
+              if (confirm(`Delete match "${task.name}"?`)) {
+                try {
+                  await deleteDoc(doc(db, "tasks", task.id));
+                  showToast("Match deleted.");
+                } catch (e) {
+                  showToast("Error deleting: " + e.message, "error");
+                }
+              }
+            };
 
-      showToast(id ? "Match updated." : "Match added.");
-      taskForm.reset();
-      taskNameInput.focus();
-    });
-  </script>
-</body>
+            controls.append(editBtn, betInfoBtn, deleteBtn);
+            div.append(info, controls);
+            tasksList.appendChild(div);
+          });
+        });
+      }
+    </script>
+  </body>
 </html>
