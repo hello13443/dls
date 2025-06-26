@@ -52,7 +52,7 @@
 
     <section>
       <h2 class="text-xl font-semibold text-gray-800 mb-4">All Matches</h2>
-      <div id="tasksList" class="space-y-4" role="list" aria-live="polite">
+      <div id="addmacthList" class="space-y-4" role="list" aria-live="polite">
         <p class="text-center text-indigo-500 italic">Loading matches...</p>
       </div>
     </section>
@@ -79,7 +79,7 @@
     const auth = getAuth(app);
 
     const tasksCol = collection(db, "tasks");
-    const tasksList = document.getElementById("tasksList");
+    const tasksList = document.getElementById("addmacthList");
     const taskForm = document.getElementById("taskForm");
     const taskIdInput = document.getElementById("taskId");
     const taskNameInput = document.getElementById("taskName");
@@ -176,7 +176,7 @@
 
           controls.append(editBtn, deleteBtn, betBtn);
           taskDiv.append(info, controls);
-          tasksList.appendChild(taskDiv);
+          addmacthList.appendChild(taskDiv);
         });
       });
     }
