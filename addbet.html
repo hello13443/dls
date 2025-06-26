@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Add Bet Match</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
   <!-- Header -->
@@ -20,54 +18,51 @@
     </div>
   </header>
 
-  <!-- Main -->
+  <!-- Main Content -->
   <main class="max-w-5xl mx-auto px-4 py-6">
-    <!-- Match Form -->
+    <!-- Form -->
     <section class="bg-white rounded-xl shadow-md p-6 mb-10">
       <h2 class="text-xl font-semibold text-gray-800 mb-4">Add / Edit Match</h2>
       <form id="taskForm" class="space-y-5">
         <input type="hidden" id="taskId" />
         <div>
-          <label for="taskName" class="block mb-1 font-medium">Match Title</label>
+          <label class="block mb-1 font-medium">Match Title</label>
           <input type="text" id="taskName" required class="w-full px-4 py-2 border rounded-lg" />
         </div>
         <div>
-          <label for="taskDesc" class="block mb-1 font-medium">Date Time</label>
+          <label class="block mb-1 font-medium">Date Time</label>
           <input type="datetime-local" id="taskDesc" class="w-full px-4 py-2 border rounded-lg" />
         </div>
         <div>
-          <label for="taskReward" class="block mb-1 font-medium">Team One</label>
+          <label class="block mb-1 font-medium">Team One</label>
           <input type="text" id="taskReward" required class="w-full px-4 py-2 border rounded-lg" />
         </div>
         <div>
-          <label for="taskView" class="block mb-1 font-medium">Team Two</label>
+          <label class="block mb-1 font-medium">Team Two</label>
           <input type="text" id="taskView" class="w-full px-4 py-2 border rounded-lg" />
         </div>
         <div>
-          <label for="betTitle" class="block mb-1 font-medium">Bet Title</label>
+          <label class="block mb-1 font-medium">Bet Title</label>
           <input type="text" id="betTitle" class="w-full px-4 py-2 border rounded-lg" />
         </div>
-
-        <!-- Responsive Grid for Options -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label for="option1" class="block mb-1 font-medium">Option 1</label>
+            <label class="block mb-1 font-medium">Option 1</label>
             <input type="text" id="option1" class="w-full px-4 py-2 border rounded-lg" />
           </div>
           <div>
-            <label for="option2" class="block mb-1 font-medium">Option 2</label>
+            <label class="block mb-1 font-medium">Option 2</label>
             <input type="text" id="option2" class="w-full px-4 py-2 border rounded-lg" />
           </div>
           <div>
-            <label for="odds1" class="block mb-1 font-medium">Odds 1</label>
+            <label class="block mb-1 font-medium">Odds 1</label>
             <input type="text" id="odds1" class="w-full px-4 py-2 border rounded-lg" />
           </div>
           <div>
-            <label for="odds2" class="block mb-1 font-medium">Odds 2</label>
+            <label class="block mb-1 font-medium">Odds 2</label>
             <input type="text" id="odds2" class="w-full px-4 py-2 border rounded-lg" />
           </div>
         </div>
-
         <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">Save Match</button>
       </form>
     </section>
@@ -75,22 +70,33 @@
     <!-- Match List -->
     <section>
       <h2 class="text-xl font-semibold text-gray-800 mb-4">All Matches</h2>
-      <div id="matchList" class="space-y-4" role="list" aria-live="polite">
+      <div id="matchList" class="space-y-4">
         <p class="text-center text-indigo-500 italic">Loading matches...</p>
       </div>
     </section>
   </main>
 
+  <!-- Custom Popup Modal -->
+  <div id="betModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white w-full max-w-md rounded-lg p-6 space-y-4 relative">
+      <h3 class="text-lg font-bold mb-2">Add Bet Info</h3>
+      <input type="text" id="popup-betTitle" placeholder="Bet Title" class="w-full border px-4 py-2 rounded" />
+      <input type="text" id="popup-option1" placeholder="Option 1" class="w-full border px-4 py-2 rounded" />
+      <input type="text" id="popup-option2" placeholder="Option 2" class="w-full border px-4 py-2 rounded" />
+      <input type="text" id="popup-odds1" placeholder="Odds 1" class="w-full border px-4 py-2 rounded" />
+      <input type="text" id="popup-odds2" placeholder="Odds 2" class="w-full border px-4 py-2 rounded" />
+      <div class="flex justify-end gap-2">
+        <button onclick="closeModal()" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">Cancel</button>
+        <button id="saveBetBtn" class="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">Save</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
-      getFirestore,
-      collection,
-      doc,
-      setDoc,
-      deleteDoc,
-      onSnapshot
+      getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -109,8 +115,7 @@
     const tasksCol = collection(db, "tasks");
 
     const taskForm = document.getElementById("taskForm");
-    const tasksList = document.getElementById("matchList");
-
+    const matchList = document.getElementById("matchList");
     const taskIdInput = document.getElementById("taskId");
     const taskNameInput = document.getElementById("taskName");
     const taskDescInput = document.getElementById("taskDesc");
@@ -122,48 +127,37 @@
     const odds1Input = document.getElementById("odds1");
     const odds2Input = document.getElementById("odds2");
 
-    function showToast(message, icon = "success") {
-      Swal.fire({ toast: true, position: "top-end", showConfirmButton: false, timer: 3000, icon, title: message });
-    }
+    let currentTaskId = null;
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        Swal.fire({ icon: "warning", title: "Please log in first." }).then(() => window.location.href = "login.html");
-      } else {
-        loadTasksRealtime();
-      }
+    const showToast = (msg) => alert(msg); // simple fallback toast
+
+    onAuthStateChanged(auth, user => {
+      if (!user) return location.href = "login.html";
+      loadTasks();
     });
 
-    function loadTasksRealtime() {
-      onSnapshot(tasksCol, (snapshot) => {
-        tasksList.innerHTML = snapshot.empty ? '<p class="text-center text-indigo-500 italic">No matches found.</p>' : "";
-
-        snapshot.forEach((docSnap) => {
-          const task = { id: docSnap.id, ...docSnap.data() };
+    function loadTasks() {
+      onSnapshot(tasksCol, snapshot => {
+        matchList.innerHTML = snapshot.empty ? `<p class="text-center italic text-gray-500">No matches found.</p>` : "";
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
           const div = document.createElement("div");
-          div.className = "p-6 bg-white rounded-2xl shadow-lg";
-
+          div.className = "bg-white rounded-xl shadow-md p-4";
           div.innerHTML = `
-            <p class="text-lg font-semibold text-indigo-700">${task.name}</p>
-            <p class="text-sm text-gray-600">${task.description || ""}</p>
-            <p class="text-indigo-600">Team One: ${task.reward || ""}</p>
-            ${task.view ? `<p>Team Two: ${task.view}</p>` : ""}
-            ${task.betTitle ? `<p class="mt-2 text-gray-800 font-medium">Bet Title: ${task.betTitle}</p>` : ""}
-            ${task.option1 ? `<p>Option 1: ${task.option1} (Odds: ${task.odds1 || "-"})</p>` : ""}
-            ${task.option2 ? `<p>Option 2: ${task.option2} (Odds: ${task.odds2 || "-"})</p>` : ""}
-            <div class="mt-4 flex flex-wrap gap-2">
-              <button class="bg-yellow-500 text-white px-4 py-2 rounded" onclick="editMatch('${task.id}', ${JSON.stringify(task).replace(/"/g, '&quot;')})">
-                <i class="fas fa-edit"></i> Edit
-              </button>
-              <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="addBetPopup('${task.id}')">
-                <i class="fas fa-plus-circle"></i> Add Bet Info
-              </button>
-              <button class="bg-red-600 text-white px-4 py-2 rounded" onclick="deleteMatch('${task.id}', '${task.name}')">
-                <i class="fas fa-trash"></i> Delete
-              </button>
+            <p class="font-bold text-indigo-700">${data.name}</p>
+            <p class="text-sm text-gray-600">${data.description || ""}</p>
+            <p class="text-gray-700">Team One: ${data.reward}</p>
+            <p>Team Two: ${data.view || ""}</p>
+            <p class="mt-2">Bet Title: ${data.betTitle || ""}</p>
+            <p>Option 1: ${data.option1 || ""} (Odds: ${data.odds1 || "-"})</p>
+            <p>Option 2: ${data.option2 || ""} (Odds: ${data.odds2 || "-"})</p>
+            <div class="flex gap-2 mt-4">
+              <button class="bg-yellow-500 text-white px-3 py-1 rounded" onclick='editMatch("${docSnap.id}", ${JSON.stringify(data).replace(/"/g, '&quot;')})'>Edit</button>
+              <button class="bg-blue-600 text-white px-3 py-1 rounded" onclick='openModal("${docSnap.id}")'>Add Bet Info</button>
+              <button class="bg-red-600 text-white px-3 py-1 rounded" onclick='deleteDoc(doc(db, "tasks", "${docSnap.id}")).then(()=>showToast("Deleted"))'>Delete</button>
             </div>
           `;
-          tasksList.appendChild(div);
+          matchList.appendChild(div);
         });
       });
     }
@@ -182,41 +176,6 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    window.addBetPopup = async (id) => {
-      const { value: formValues } = await Swal.fire({
-        title: "Add Bet Info",
-        html: `
-          <input id="swal-bet" class="swal2-input" placeholder="Bet Title">
-          <input id="swal-op1" class="swal2-input" placeholder="Option 1">
-          <input id="swal-op2" class="swal2-input" placeholder="Option 2">
-          <input id="swal-odds1" class="swal2-input" placeholder="Odds 1">
-          <input id="swal-odds2" class="swal2-input" placeholder="Odds 2">
-        `,
-        focusConfirm: false,
-        preConfirm: () => {
-          return {
-            betTitle: document.getElementById('swal-bet').value,
-            option1: document.getElementById('swal-op1').value,
-            option2: document.getElementById('swal-op2').value,
-            odds1: document.getElementById('swal-odds1').value,
-            odds2: document.getElementById('swal-odds2').value
-          };
-        }
-      });
-
-      if (formValues) {
-        await setDoc(doc(db, "tasks", id), formValues, { merge: true });
-        showToast("Bet info added.");
-      }
-    };
-
-    window.deleteMatch = async (id, name) => {
-      if (confirm(`Delete match "${name}"?`)) {
-        await deleteDoc(doc(db, "tasks", id));
-        showToast("Match deleted.");
-      }
-    };
-
     taskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const id = taskIdInput.value.trim();
@@ -231,16 +190,33 @@
         odds1: odds1Input.value.trim(),
         odds2: odds2Input.value.trim(),
       };
-
-      if (!data.name || !data.reward) return showToast("Match title and Team One are required.", "warning");
-
-      await (id
-        ? setDoc(doc(db, "tasks", id), data, { merge: true })
-        : setDoc(doc(collection(db, "tasks")), data));
-
-      showToast(id ? "Match updated." : "Match added.");
+      const ref = id ? doc(db, "tasks", id) : doc(collection(db, "tasks"));
+      await setDoc(ref, data, { merge: true });
+      showToast(id ? "Match Updated" : "Match Added");
       taskForm.reset();
-      taskNameInput.focus();
+    });
+
+    window.openModal = (id) => {
+      currentTaskId = id;
+      document.getElementById("betModal").classList.remove("hidden");
+    };
+
+    window.closeModal = () => {
+      document.getElementById("betModal").classList.add("hidden");
+    };
+
+    document.getElementById("saveBetBtn").addEventListener("click", async () => {
+      if (!currentTaskId) return;
+      const data = {
+        betTitle: document.getElementById("popup-betTitle").value,
+        option1: document.getElementById("popup-option1").value,
+        option2: document.getElementById("popup-option2").value,
+        odds1: document.getElementById("popup-odds1").value,
+        odds2: document.getElementById("popup-odds2").value
+      };
+      await setDoc(doc(db, "tasks", currentTaskId), data, { merge: true });
+      closeModal();
+      showToast("Bet Info Updated");
     });
   </script>
 </body>
