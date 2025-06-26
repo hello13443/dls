@@ -3,39 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bet Manager</title>
+  <title>All Matches</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 </head>
 <body class="bg-gray-100 min-h-screen">
-  <!-- Header -->
-  <header class="bg-white shadow-md relative">
-    <div class="max-w-7xl mx-auto px-4 py-3 relative flex items-center justify-center">
-      <p onclick="window.location.href='admin.html'" class="absolute left-4 text-gray-700 cursor-pointer">
+  <header class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center relative">
+      <p onclick="window.location.href='/admin.html'" class="absolute left-4 text-gray-700 cursor-pointer">
         <i class="fas fa-arrow-left text-2xl"></i>
       </p>
-      <h1 class="text-xl font-bold text-gray-800">Bet Manager</h1>
+      <h1 class="text-xl font-bold text-gray-800">All Matches</h1>
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto px-4 py-6">
+  <main class="max-w-5xl mx-auto px-4 py-6">
     <section>
-      <div id="tasksList" class="space-y-4" role="list" aria-live="polite">
+      <div id="matchList" class="space-y-4">
         <p class="text-center text-indigo-500 italic">Loading matches...</p>
       </div>
     </section>
   </main>
 
+  <!-- Bet Modal -->
+  <div id="betModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white w-full max-w-md rounded-lg p-6 space-y-4 relative">
+      <h3 class="text-lg font-bold mb-2">Add Bet Info</h3>
+      <input type="text" id="popup-betTitle" placeholder="Bet Title" class="w-full border px-4 py-2 rounded" />
+      <input type="text" id="popup-option1" placeholder="Option 1" class="w-full border px-4 py-2 rounded" />
+      <input type="text" id="popup-option2" placeholder="Option 2" class="w-full border px-4 py-2 rounded" />
+      <input type="text" id="popup-odds1" placeholder="Odds 1" class="w-full border px-4 py-2 rounded" />
+      <input type="text" id="popup-odds2" placeholder="Odds 2" class="w-full border px-4 py-2 rounded" />
+      <div class="flex justify-end gap-2">
+        <button onclick="closeModal()" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">Cancel</button>
+        <button id="saveBetBtn" class="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
-      getFirestore,
-      collection,
-      doc,
-      deleteDoc,
-      onSnapshot
+      getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -51,142 +60,73 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-
     const tasksCol = collection(db, "tasks");
-    const tasksList = document.getElementById("tasksList");
 
-    function showToast(message, icon = "success") {
-      Swal.fire({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        icon: icon,
-        title: message,
-      });
-    }
+    const matchList = document.getElementById("matchList");
+    let currentTaskId = null;
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        Swal.fire({
-          icon: "warning",
-          title: "Please log in first.",
-          confirmButtonText: "OK"
-        }).then(() => {
-          window.location.href = "login.html";
-        });
-        return;
-      }
-      loadTasksRealtime();
+    const showToast = (msg) => alert(msg);
+
+    onAuthStateChanged(auth, user => {
+      if (!user) return location.href = "login.html";
+      loadTasks();
     });
 
-    function loadTasksRealtime() {
-      onSnapshot(tasksCol, (snapshot) => {
-        if (snapshot.empty) {
-          tasksList.innerHTML = '<p class="text-center text-indigo-500 italic">No matches found.</p>';
-          return;
-        }
-
-        tasksList.innerHTML = "";
-        snapshot.forEach((docSnap) => {
-          const task = { id: docSnap.id, ...docSnap.data() };
-
-          const taskDiv = document.createElement("div");
-          taskDiv.className = "p-6 bg-white rounded-2xl shadow-lg flex flex-col gap-4";
-          taskDiv.id = `task-${task.id}`;
-
-          const info = document.createElement("div");
-          info.innerHTML = `
-            <p class="text-lg font-semibold text-indigo-700 truncate">${task.name}</p>
-            <p class="text-sm text-gray-600 mt-1">${task.description || ""}</p>
-            <div class="mt-3 text-base font-medium text-gray-800">
-              <span class="text-green-600">${task.reward || "Team One"}</span>
-              <span class="mx-2 font-bold text-gray-500">vs</span>
-              <span class="text-red-600">${task.view || "Team Two"}</span>
+    function loadTasks() {
+      onSnapshot(tasksCol, snapshot => {
+        matchList.innerHTML = snapshot.empty ? `<p class="text-center italic text-gray-500">No matches found.</p>` : "";
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const div = document.createElement("div");
+          div.className = "bg-white rounded-xl shadow-md p-4";
+          div.innerHTML = `
+            <p class="font-bold text-indigo-700">${data.name}</p>
+            <p class="text-sm text-gray-600">${data.description || ""}</p>
+            <p class="text-gray-700">Team One: ${data.reward}</p>
+            <p>Team Two: ${data.view || ""}</p>
+            <p class="mt-2">Bet Title: ${data.betTitle || ""}</p>
+            <p>Option 1: ${data.option1 || ""} (Odds: ${data.odds1 || "-"})</p>
+            <p>Option 2: ${data.option2 || ""} (Odds: ${data.odds2 || "-"})</p>
+            <div class="flex gap-2 mt-4">
+              <button class="bg-blue-600 text-white px-3 py-1 rounded" onclick='openModal("${docSnap.id}")'>Add Bet Info</button>
+              <button class="bg-red-600 text-white px-3 py-1 rounded" onclick='deleteDoc(doc(db, "tasks", "${docSnap.id}")).then(()=>showToast("Deleted"))'>Delete</button>
             </div>
           `;
-
-          const optionsList = document.createElement("div");
-          optionsList.className = "options space-y-2";
-          optionsList.id = `options-${task.id}`;
-
-          const controls = document.createElement("div");
-          controls.className = "flex flex-wrap gap-2";
-
-          const addOptionBtn = document.createElement("button");
-          addOptionBtn.className = "bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-white";
-          addOptionBtn.innerHTML = `<i class="fas fa-plus-circle mr-1"></i> Add Option`;
-          addOptionBtn.onclick = () => {
-            if (taskDiv.querySelector(".option-form")) return;
-
-            const form = document.createElement("div");
-            form.className = "option-form mt-4 bg-gray-100 p-4 rounded-xl space-y-2";
-
-            form.innerHTML = `
-              <input type="text" placeholder="Option Title" class="w-full px-3 py-2 rounded border border-gray-300" id="title-${task.id}">
-              <input type="text" placeholder="Option One" class="w-full px-3 py-2 rounded border border-gray-300" id="one-${task.id}">
-              <input type="text" placeholder="Option Two" class="w-full px-3 py-2 rounded border border-gray-300" id="two-${task.id}">
-              <input type="number" placeholder="Point One" class="w-full px-3 py-2 rounded border border-gray-300" id="pointOne-${task.id}">
-              <input type="number" placeholder="Point Two" class="w-full px-3 py-2 rounded border border-gray-300" id="pointTwo-${task.id}">
-              <div class="flex gap-2">
-                <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onclick="addOption('${task.id}')">Add</button>
-                <button class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded" onclick="this.closest('.option-form').remove()">Cancel</button>
-              </div>
-            `;
-            taskDiv.appendChild(form);
-          };
-
-          const deleteBtn = document.createElement("button");
-          deleteBtn.className = "bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-white";
-          deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Delete`;
-          deleteBtn.onclick = async () => {
-            if (confirm(`Delete match "${task.name}"?`)) {
-              try {
-                await deleteDoc(doc(db, "tasks", task.id));
-                showToast("Match deleted.");
-              } catch (error) {
-                showToast("Error: " + error.message, "error");
-              }
-            }
-          };
-
-          controls.appendChild(addOptionBtn);
-          controls.appendChild(deleteBtn);
-
-          taskDiv.appendChild(info);
-          taskDiv.appendChild(optionsList);
-          taskDiv.appendChild(controls);
-          tasksList.appendChild(taskDiv);
+          matchList.appendChild(div);
         });
       });
     }
 
-    window.addOption = function(taskId) {
-      const title = document.getElementById(`title-${taskId}`).value.trim();
-      const one = document.getElementById(`one-${taskId}`).value.trim();
-      const two = document.getElementById(`two-${taskId}`).value.trim();
-      const pointOne = document.getElementById(`pointOne-${taskId}`).value.trim();
-      const pointTwo = document.getElementById(`pointTwo-${taskId}`).value.trim();
-
-      if (!title || !one || !two || !pointOne || !pointTwo) {
-        showToast("Please fill in all fields.", "warning");
-        return;
-      }
-
-      const optionHTML = `
-        <div class="bg-indigo-50 border-l-4 border-indigo-500 text-indigo-700 p-3 rounded-md shadow">
-          <p class="font-semibold">${title}</p>
-          <p class="text-sm mt-1">${one} (${pointOne} pts) vs ${two} (${pointTwo} pts)</p>
-        </div>
-      `;
-
-      const optionsList = document.getElementById(`options-${taskId}`);
-      optionsList.insertAdjacentHTML("beforeend", optionHTML);
-
-      showToast("Option added.");
-      document.getElementById(`title-${taskId}`).closest('.option-form').remove();
+    window.openModal = (id) => {
+      currentTaskId = id;
+      document.getElementById("betModal").classList.remove("hidden");
     };
+
+    window.closeModal = () => {
+      document.getElementById("betModal").classList.add("hidden");
+    };
+
+    document.getElementById("saveBetBtn").addEventListener("click", async () => {
+      if (!currentTaskId) return;
+      const betData = {
+        betTitle: document.getElementById("popup-betTitle").value,
+        option1: document.getElementById("popup-option1").value,
+        option2: document.getElementById("popup-option2").value,
+        odds1: document.getElementById("popup-odds1").value,
+        odds2: document.getElementById("popup-odds2").value
+      };
+      await setDoc(doc(db, "tasks", currentTaskId), betData, { merge: true });
+
+      // Clear inputs
+      document.getElementById("popup-betTitle").value = "";
+      document.getElementById("popup-option1").value = "";
+      document.getElementById("popup-option2").value = "";
+      document.getElementById("popup-odds1").value = "";
+      document.getElementById("popup-odds2").value = "";
+
+      closeModal();
+      showToast("Bet Info Saved");
+    });
   </script>
 </body>
 </html>
