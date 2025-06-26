@@ -110,6 +110,32 @@
           const task = { id: docSnap.id, ...docSnap.data() };
           const completed = userData.completedTasks?.includes(task.id);
 
+          // Build HTML for bets array
+          let betsHTML = '';
+          if (Array.isArray(task.bets) && task.bets.length > 0) {
+            betsHTML = `<div class="mt-3 bg-[#3b1f73] p-3 rounded-lg text-sm space-y-3">`;
+            task.bets.forEach(bet => {
+              betsHTML += `
+                <div class="border border-purple-500 rounded p-2">
+                  <p class="font-semibold mb-1">${bet.betTitle || 'No Bet Title'}</p>
+                  <div class="flex justify-between text-center">
+                    <div class="flex-1">
+                      <p>${bet.option1 || '-'}</p>
+                      <p class="bg-blue-600 py-1 px-2 rounded mt-1">${bet.odds1 || '-'}</p>
+                    </div>
+                    <div class="flex-1">
+                      <p>${bet.option2 || '-'}</p>
+                      <p class="bg-blue-600 py-1 px-2 rounded mt-1">${bet.odds2 || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+            betsHTML += `</div>`;
+          } else {
+            betsHTML = `<p class="mt-3 text-gray-400 text-center italic">No bets available</p>`;
+          }
+
           const matchHTML = `
             <div class="bg-[#25114d] rounded-xl p-4 mb-5 text-white shadow-md border border-purple-700">
               <div class="flex justify-between items-center mb-2 text-sm text-gray-300">
@@ -127,19 +153,8 @@
                   <p class="font-semibold">${task.view || "Team 2"}</p>
                 </div>
               </div>
-              <div class="bg-[#3b1f73] p-3 rounded-lg mt-3 text-sm">
-                <p class="mb-2">${task.betTitle || "No Bet Title"}</p>
-                <div class="flex justify-between text-center">
-                  <div class="flex-1">
-                    <p>${task.option2 || '-'}</p>
-                    <p class="bg-blue-600 py-1 px-2 rounded mt-1">${task.odds2 || '-'}</p>
-                  </div>
-                  <div class="flex-1">
-                    <p>${task.option1 || '-'}</p>
-                    <p class="bg-blue-600 py-1 px-2 rounded mt-1">${task.odds1 || '-'}</p>
-                  </div>
-                </div>
-              </div>
+
+              ${betsHTML}
             </div>
           `;
           tasksList.innerHTML += matchHTML;
