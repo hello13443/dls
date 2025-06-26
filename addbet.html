@@ -10,7 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
   <body class="bg-gray-100 min-h-screen">
-    <!-- Header -->
     <header class="bg-white shadow-md relative">
       <div class="max-w-7xl mx-auto px-4 py-3 relative flex items-center justify-center">
         <p onclick="window.location.href='/admin.html'" class="absolute left-4 text-gray-700 cursor-pointer">
@@ -21,29 +20,38 @@
     </header>
 
     <main class="max-w-4xl mx-auto px-4 py-6">
-      <!-- Match Form Section -->
       <section class="bg-white rounded-xl shadow-md p-6 mb-10">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Add / Edit Match</h2>
         <form id="taskForm" class="space-y-5">
           <input type="hidden" id="taskId" />
           <div>
-            <label for="taskName" class="block font-medium text-gray-700 mb-1">Match Title</label>
+            <label class="block font-medium text-gray-700 mb-1">Bet Title</label>
             <input type="text" id="taskName" required placeholder="Enter match title"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
           </div>
           <div>
-            <label for="taskDesc" class="block font-medium text-gray-700 mb-1">Date Time</label>
+            <label class="block font-medium text-gray-700 mb-1">Date Time</label>
             <input type="datetime-local" id="taskDesc"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
           </div>
           <div>
-            <label for="taskReward" class="block font-medium text-gray-700 mb-1">Team One</label>
-            <input type="text" id="taskReward" required placeholder="Enter Team One name"
+            <label class="block font-medium text-gray-700 mb-1">Option One</label>
+            <input type="text" id="taskReward" required placeholder="Enter Option One name"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
           </div>
           <div>
-            <label for="taskView" class="block font-medium text-gray-700 mb-1">Team Two</label>
-            <input type="text" id="taskView" placeholder="Enter Team Two name"
+            <label class="block font-medium text-gray-700 mb-1">Option Two</label>
+            <input type="text" id="taskView" placeholder="Enter Option Two name"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-medium text-gray-700 mb-1">Point One</label>
+            <input type="text" id="pointOne" placeholder="Enter point for Option One"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-medium text-gray-700 mb-1">Point Two</label>
+            <input type="text" id="pointTwo" placeholder="Enter point for Option Two"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
           </div>
           <div class="flex flex-col sm:flex-row gap-4">
@@ -53,7 +61,6 @@
         </form>
       </section>
 
-      <!-- Matches List Section -->
       <section>
         <h2 class="text-xl font-semibold text-gray-800 mb-4">All Matches</h2>
         <div id="tasksList" class="space-y-4" role="list" aria-live="polite">
@@ -65,12 +72,7 @@
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
       import {
-        getFirestore,
-        collection,
-        doc,
-        setDoc,
-        deleteDoc,
-        onSnapshot
+        getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot
       } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -90,11 +92,14 @@
       const tasksCol = collection(db, "tasks");
       const tasksList = document.getElementById("tasksList");
       const taskForm = document.getElementById("taskForm");
+
       const taskIdInput = document.getElementById("taskId");
       const taskNameInput = document.getElementById("taskName");
       const taskDescInput = document.getElementById("taskDesc");
       const taskRewardInput = document.getElementById("taskReward");
       const taskViewInput = document.getElementById("taskView");
+      const pointOneInput = document.getElementById("pointOne");
+      const pointTwoInput = document.getElementById("pointTwo");
 
       function showToast(message, icon = "success") {
         Swal.fire({
@@ -141,30 +146,32 @@
             info.innerHTML = `
               <p class="text-lg font-semibold text-indigo-700 truncate">${task.name}</p>
               <p class="text-sm text-gray-600 mt-1">${task.description || ""}</p>
-              <p class="mt-2 font-medium text-indigo-600">Team One: ${task.reward || ""}</p>
-              ${task.view ? `<p class="mt-1">Team Two: ${task.view}</p>` : ""}
+              <p class="mt-2 font-medium text-indigo-600">Option One: ${task.reward || ""}</p>
+              ${task.view ? `<p class="mt-1">Option Two: ${task.view}</p>` : ""}
+              ${task.pointOne ? `<p class="mt-1 text-sm text-gray-700">Point One: ${task.pointOne}</p>` : ""}
+              ${task.pointTwo ? `<p class="mt-1 text-sm text-gray-700">Point Two: ${task.pointTwo}</p>` : ""}
             `;
 
             const controls = document.createElement("div");
             controls.className = "flex gap-2 sm:gap-3";
 
             const editBtn = document.createElement("button");
-            editBtn.className = "bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-300";
+            editBtn.className = "bg-yellow-400 hover:bg-yellow-500 px-4 py-2 rounded-xl text-white transition shadow-md";
             editBtn.innerHTML = `<i class="fas fa-edit"></i> Edit`;
-            editBtn.title = "Edit Match";
             editBtn.onclick = () => {
               taskIdInput.value = task.id;
               taskNameInput.value = task.name;
               taskDescInput.value = task.description || "";
-              taskRewardInput.value = task.reward;
+              taskRewardInput.value = task.reward || "";
               taskViewInput.value = task.view || "";
+              pointOneInput.value = task.pointOne || "";
+              pointTwoInput.value = task.pointTwo || "";
               window.scrollTo({ top: 0, behavior: "smooth" });
             };
 
             const deleteBtn = document.createElement("button");
-            deleteBtn.className = "bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-white transition shadow-md focus:outline-none focus:ring-2 focus:ring-red-400";
+            deleteBtn.className = "bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-white transition shadow-md";
             deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Delete`;
-            deleteBtn.title = "Delete Match";
             deleteBtn.onclick = async () => {
               if (confirm(`Delete match "${task.name}"? This action cannot be undone.`)) {
                 try {
@@ -194,16 +201,20 @@
         const description = taskDescInput.value.trim();
         const reward = taskRewardInput.value.trim();
         const view = taskViewInput.value.trim();
+        const pointOne = pointOneInput.value.trim();
+        const pointTwo = pointTwoInput.value.trim();
 
         if (!name) return showToast("Match title is required.", "warning");
-        if (!reward) return showToast("Team One name is required.", "warning");
+        if (!reward) return showToast("Option One is required.", "warning");
+
+        const taskData = { name, description, reward, view, pointOne, pointTwo };
 
         try {
           if (id) {
-            await setDoc(doc(db, "tasks", id), { name, description, reward, view }, { merge: true });
+            await setDoc(doc(db, "tasks", id), taskData, { merge: true });
             showToast("Match updated.");
           } else {
-            await setDoc(doc(collection(db, "tasks")), { name, description, reward, view });
+            await setDoc(doc(collection(db, "tasks")), taskData);
             showToast("Match added.");
           }
 
