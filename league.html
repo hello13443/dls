@@ -1,254 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bet Match</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <style>
-    .swal2-timer-progress-bar {
-      background: #facc15 !important;
-    }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bet Match</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    .swal2-timer-progress-bar {
+      background: #facc15 !important;
+    }
 
-    .glow-yellow {
-      box-shadow: 0 0 5px rgba(234, 179, 8, 0.5);
-    }
+    .glow-yellow {
+      box-shadow: 0 0 5px rgba(234, 179, 8, 0.5);
+    }
 
-    .user-icon-glow {
-      box-shadow: 0 0 15px 4px rgba(175, 85, 247, 0.8);
-    }
+    .user-icon-glow {
+      box-shadow: 0 0 15px 4px rgba(175, 85, 247, 0.8);
+    }
 
-    @keyframes borderGlow {
-      0%, 100% {
-        border-color: #facc15;
-        box-shadow: 0 0 20px #facc15;
-      }
-      50% {
-        border-color: #5f27cd;
-        box-shadow: 0 0 20px #5f27cd;
-      }
-    }
+    @keyframes borderGlow {
+      0%, 100% {
+        border-color: #facc15;
+        box-shadow: 0 0 20px #facc15;
+      }
+      50% {
+        border-color: #5f27cd;
+        box-shadow: 0 0 20px #5f27cd;
+      }
+    }
 
-    .animate-borderGlow {
-      animation: borderGlow 5s ease-in-out infinite;
-    }
+    .animate-borderGlow {
+      animation: borderGlow 5s ease-in-out infinite;
+    }
 
-    .loader {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 6px solid rgba(255, 255, 255, 0.15);
-      border-top-color: #facc15;
-      animation: spin 2s ease-in-out infinite;
-      box-shadow:
-        0 0 8px #facc15,
-        inset 0 0 8px #facc15;
-    }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-  </style>
+    .loader {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 6px solid rgba(255, 255, 255, 0.15);
+      border-top-color: #facc15;
+      animation: spin 2s ease-in-out infinite;
+      box-shadow:
+        0 0 8px #facc15,
+        inset 0 0 8px #facc15;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 <body class="bg-black text-white">
 
-  <div id="loadingOverlay" class="fixed inset-0 bg-black flex items-center justify-center z-50">
-    <div class="text-center">
-      <div class="loader mx-auto mb-4"></div>
-      <h1 class="text-2xl font-bold animate-pulse bg-gradient-to-r from-yellow-400 via-green-300 to-yellow-400 bg-clip-text text-transparent" style="font-family: 'Audiowide', cursive;">Good Job</h1>
-      <p class="text-gray-400 text-xs">Loading...</p>
-    </div>
-  </div>
+  <div id="loadingOverlay" class="fixed inset-0 bg-black flex items-center justify-center z-50">
+    <div class="text-center">
+      <div class="loader mx-auto mb-4"></div>
+      <h1 class="text-2xl font-bold animate-pulse bg-gradient-to-r from-yellow-400 via-green-300 to-yellow-400 bg-clip-text text-transparent" style="font-family: 'Audiowide', cursive;">Good Job</h1>
+      <p class="text-gray-400 text-xs">Loading...</p>
+    </div>
+  </div>
 
-  <header class="bg-black w-full max-w-md shadow-md py-2 px-3 mb-2 mx-auto border-b border-gray-600 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <div class="bg-yellow-600 bg-opacity-50 border border-yellow-500 text-yellow-300 w-9 h-9 flex items-center justify-center font-bold rounded-full" style="font-family: 'Audiowide', cursive;">
-        GJ
-      </div>
-      <h2 class="text-xl font-bold text-center bg-gradient-to-r from-yellow-400 via-green-300 to-yellow-400 bg-clip-text text-transparent" style="font-family: 'Audiowide', cursive;">Good Job</h2>
-    </div>
-    <div class="flex items-center gap-6 text-2xl text-gray-100">
-      <i class="fa-solid fa-headset font-bold text-1xl"></i>
-      <div id="ProfileBtn" class="bg-gray-900 w-5 h-8 hover:border-purple-500 flex items-center justify-center rounded-sm border border-gray-700" onclick="toggleProfile()">
-        <i class="fa-solid fa-ellipsis-vertical"></i>
-      </div>
-    </div>
-  </header>
+  <header class="bg-black w-full max-w-md shadow-md py-2 px-3 mb-2 mx-auto border-b border-gray-600 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="bg-yellow-600 bg-opacity-50 border border-yellow-500 text-yellow-300 w-9 h-9 flex items-center justify-center font-bold rounded-full" style="font-family: 'Audiowide', cursive;">
+        GJ
+      </div>
+      <h2 class="text-xl font-bold text-center bg-gradient-to-r from-yellow-400 via-green-300 to-yellow-400 bg-clip-text text-transparent" style="font-family: 'Audiowide', cursive;">Good Job</h2>
+    </div>
+    <div class="flex items-center gap-6 text-2xl text-gray-100">
+      <i class="fa-solid fa-headset font-bold text-1xl"></i>
+      <div id="ProfileBtn" class="bg-gray-900 w-5 h-8 hover:border-purple-500 flex items-center justify-center rounded-sm border border-gray-700" onclick="toggleProfile()">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+      </div>
+    </div>
+  </header>
 
-  <main class="max-w-2xl mx-auto px-4 mb-10">
-    <section>
-      <div id="tasksList">
-        <p class="text-center text-gray-100 text-lg">Loading...</p>
-      </div>
-    </section>
-  </main>
+  <main class="max-w-2xl mx-auto px-4 mb-10">
+    <section>
+      <div id="tasksList">
+        <p class="text-center text-gray-100 text-lg">Loading...</p>
+      </div>
+    </section>
+  </main>
 
-  <nav class="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-700 flex justify-around items-center py-2 rounded-t-2xl shadow-inner text-white h-16 z-10">
-    <a href="dashboard.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
-        <i class="fa-solid fa-house text-lg text-gray-300 hover:text-yellow-400"></i>
-      </div>
-      Home
-    </a>
-    <a href="job.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
-        <i class="fa-solid fa-briefcase text-lg text-gray-300 hover:text-yellow-400"></i>
-      </div>
-      Job
-    </a>
-    <a href="pro-account.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
-        <i class="fa-solid fa-star text-lg text-gray-300 hover:text-yellow-400"></i>
-      </div>
-      Pro
-    </a>
-    <a href="team.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
-        <i class="fa-solid fa-users text-lg text-gray-300 hover:text-yellow-400"></i>
-      </div>
-      Team
-    </a>
-    <a href="profile.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
-      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-400">
-        <i class="fa-solid fa-user text-lg text-gray-400 hover:text-yellow-400"></i>
-      </div> 
-      Profile
-    </a>
-  </nav>
+  <nav class="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-700 flex justify-around items-center py-2 rounded-t-2xl shadow-inner text-white h-16 z-10">
+    <a href="dashboard.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+        <i class="fa-solid fa-house text-lg text-gray-300 hover:text-yellow-400"></i>
+      </div>
+      Home
+    </a>
+    <a href="job.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+        <i class="fa-solid fa-briefcase text-lg text-gray-300 hover:text-yellow-400"></i>
+      </div>
+      Job
+    </a>
+    <a href="pro-account.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+        <i class="fa-solid fa-star text-lg text-gray-300 hover:text-yellow-400"></i>
+      </div>
+      Pro
+    </a>
+    <a href="team.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-500">
+        <i class="fa-solid fa-users text-lg text-gray-300 hover:text-yellow-400"></i>
+      </div>
+      Team
+    </a>
+    <a href="profile.html" class="nav-item flex flex-col items-center text-xs font-semibold no-underline">
+      <div class="bg-gray-900 bg-opacity-70 w-9 h-9 rounded-full mb-1 flex items-center justify-center border border-gray-400">
+        <i class="fa-solid fa-user text-lg text-gray-400 hover:text-yellow-400"></i>
+      </div> 
+      Profile
+    </a>
+  </nav>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getFirestore, collection, onSnapshot, doc, getDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import {
-      getAuth, onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, collection, onSnapshot, doc, getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      getAuth, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
-      authDomain: "dlstournament-31ac1.firebaseapp.com",
-      projectId: "dlstournament-31ac1",
-      storageBucket: "dlstournament-31ac1.appspot.com",
-      messagingSenderId: "874377019055",
-      appId: "1:874377019055:web:6e38db2ec7f0d541d2de5a"
-    };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
+      authDomain: "dlstournament-31ac1.firebaseapp.com",
+      projectId: "dlstournament-31ac1",
+      storageBucket: "dlstournament-31ac1.appspot.com",
+      messagingSenderId: "874377019055",
+      appId: "1:874377019055:web:6e38db2ec7f0d541d2de5a"
+    };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    const tasksList = document.getElementById("tasksList");
-    let currentUser = null;
-    let userData = null;
+    const tasksList = document.getElementById("tasksList");
+    let currentUser = null;
+    let userData = null;
 
-    const toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-      background: '#1a202c',
-      color: '#fff',
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer)
-        toast.addEventListener('mouseleave', Swal.resumeTimer)
-      }
-    });
+    const toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      background: '#1a202c',
+      color: '#fff',
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    });
 
-    function hideLoader() {
-      const loader = document.getElementById('loadingOverlay');
-      if (loader) loader.style.display = 'none';
-    }
+    function hideLoader() {
+      const loader = document.getElementById('loadingOverlay');
+      if (loader) loader.style.display = 'none';
+    }
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Please log in to view tasks.',
-          showConfirmButton: false,
-          timer: 1500,
-          position: 'top-end'
-        });
-        setTimeout(() => {
-          window.location.href = "login.html";
-        }, 1500);
-        return;
-      }
-      currentUser = user;
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Please log in to view tasks.',
+          showConfirmButton: false,
+          timer: 1500,
+          position: 'top-end'
+        });
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 1500);
+        return;
+      }
+      currentUser = user;
 
-      const userDocRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userDocRef);
-      userData = userSnap.exists() ? userSnap.data() : { balance: 0, completedTasks: [] };
+      const userDocRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDocRef);
+      userData = userSnap.exists() ? userSnap.data() : { balance: 0, completedTasks: [] };
 
-      loadTasks();
-    });
+      loadTasks();
+    });
 
-    function loadTasks() {
-      const tasksCol = collection(db, "tasks");
+    function loadTasks() {
+      const tasksCol = collection(db, "tasks");
 
-      onSnapshot(tasksCol, (snapshot) => {
-        if (snapshot.empty) {
-          tasksList.innerHTML = "<p class='text-center text-gray-200 text-lg'>No tasks available right now.</p>";
-          hideLoader();
-          return;
-        }
+      onSnapshot(tasksCol, (snapshot) => {
+        if (snapshot.empty) {
+          tasksList.innerHTML = "<p class='text-center text-gray-200 text-lg'>No tasks available right now.</p>";
+          hideLoader();
+          return;
+        }
 
-        tasksList.innerHTML = "";
+        tasksList.innerHTML = "";
 
-        snapshot.forEach(docSnap => {
-          const task = { id: docSnap.id, ...docSnap.data() };
-          const completed = userData.completedTasks?.includes(task.id);
+        snapshot.forEach(docSnap => {
+          const task = { id: docSnap.id, ...docSnap.data() };
+          const completed = userData.completedTasks?.includes(task.id);
 
-          const taskDiv = document.createElement("div");
-          taskDiv.className = "bg-gradient-to-r from-yellow-400 via-green-400 to-yellow-400 rounded-2xl p-6 mb-6 shadow-lg border border-yellow-300";
+          const taskDiv = document.createElement("div");
+          taskDiv.className = "bg-gradient-to-r from-yellow-400 via-green-400 to-yellow-400 rounded-2xl p-6 mb-6 shadow-lg border border-yellow-300";
 
-          // New card design with grid layout for teams and date
-          let taskHtml = `
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-2xl font-bold text-black" style="font-family: 'Audiowide', cursive;">${task.name}</h3>
-              <span class="text-sm text-black font-semibold italic">${task.description ? new Date(task.description).toLocaleString() : ''}</span>
-            </div>
+          // New card design with grid layout for teams and date, and bet info below teams
+          let taskHtml = `
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-2xl font-bold text-black" style="font-family: 'Audiowide', cursive;">${task.name}</h3>
+              <span class="text-sm text-black font-semibold italic">${task.description ? new Date(task.description).toLocaleString() : ''}</span>
+            </div>
 
-            <div class="grid grid-cols-2 gap-6 bg-black bg-opacity-70 rounded-xl p-4 text-yellow-300 font-semibold text-lg">
-              <div class="flex flex-col items-center justify-center border-r border-yellow-300">
-                <i class="fas fa-futbol text-yellow-400 text-4xl mb-2"></i>
-                <span class="text-indigo-400 text-xl">${task.reward || "Team One"}</span>
-              </div>
-              <div class="flex flex-col items-center justify-center">
-                <i class="fas fa-futbol text-yellow-400 text-4xl mb-2"></i>
-                <span class="text-indigo-400 text-xl">${task.view || "Team Two"}</span>
-              </div>
-            </div>
-          `;
+            <div class="grid grid-cols-2 gap-6 bg-black bg-opacity-70 rounded-xl p-4 text-yellow-300 font-semibold text-lg">
+              <div class="flex flex-col items-center justify-center border-r border-yellow-300">
+                <i class="fas fa-futbol text-yellow-400 text-4xl mb-2"></i>
+                <span class="text-indigo-400 text-xl">${task.reward || "Team One"}</span>
+              </div>
+              <div class="flex flex-col items-center justify-center">
+                <i class="fas fa-futbol text-yellow-400 text-4xl mb-2"></i>
+                <span class="text-indigo-400 text-xl">${task.view || "Team Two"}</span>
+              </div>
+            </div>
+          `;
 
-          // Bet info block added here:
-          if (task.bet) {
-            taskHtml += `
-              <div class="mt-4 bg-black bg-opacity-60 rounded-xl p-4 border border-yellow-400 text-yellow-300 font-semibold text-sm">
-                <p><strong>Bet Title:</strong> ${task.bet.title}</p>
-                <p><strong>Option 1:</strong> ${task.bet.option1} (${task.bet.point1} pts)</p>
-                <p><strong>Option 2:</strong> ${task.bet.option2} (${task.bet.point2} pts)</p>
-              </div>
-            `;
-          }
+          if (task.bet && typeof task.bet === 'object') {
+            taskHtml += `
+              <div class="mt-4 bg-yellow-900 bg-opacity-70 rounded-xl p-4 text-yellow-300 border border-yellow-500">
+                <p class="font-semibold text-lg mb-2">Bet Info</p>
+                <p><strong>Bet Title:</strong> ${task.bet.title || '-'}</p>
+                <p><strong>Option 1:</strong> ${task.bet.option1 || '-'} (${task.bet.point1 || '-' } pts)</p>
+                <p><strong>Option 2:</strong> ${task.bet.option2 || '-'} (${task.bet.point2 || '-' } pts)</p>
+              </div>
+            `;
+          }
 
-          if (completed) {
-            taskHtml += `<p class="mt-4 px-4 py-2 bg-green-600 text-white rounded text-center font-semibold">✔ Completed Job</p>`;
-          }
+          if (completed) {
+            taskHtml += `<p class="mt-4 px-4 py-2 bg-green-600 text-white rounded text-center font-semibold">✔ Completed Job</p>`;
+          }
 
-          taskDiv.innerHTML = taskHtml;
-          tasksList.appendChild(taskDiv);
-        });
+          taskDiv.innerHTML = taskHtml;
+          tasksList.appendChild(taskDiv);
+        });
 
-        hideLoader();
-      });
-    }
-  </script>
+        hideLoader();
+      });
+    }
+  </script>
 </body>
 </html>
