@@ -1,1 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bet Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <header class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center relative">
+      <p onclick="window.location.href='/admin.html'" class="absolute left-4 text-gray-700 cursor-pointer">
+        <i class="fas fa-arrow-left text-2xl"></i>
+      </p>
+      <h1 class="text-xl font-bold text-gray-800">All Matches</h1>
+    </div>
+  </header>
 
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    <section>
+      <div id="matchList" class="space-y-4">
+        <p class="text-center text-indigo-500 italic">Loading matches...</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bet Modal -->
+  <div id="betModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white w-full max-w-md rounded-lg p-6 space-y-4 relative">
+      <h3 class="text-lg font-bold mb-2">Add Bet Info</h3>
+      <input type="text" id="popup-betTitle" placeholder="Bet Title" class="w-full border px-4 py-2 rounded" />
+      
+      <!-- Option 1 + Odds 1 -->
+      <div class="flex gap-2">
+        <input type="text" id="popup-option1" placeholder="Option 1" class="w-1/2 border px-4 py-2 rounded" />
+        <input type="text" id="popup-odds1" placeholder="Odds 1" class="w-1/2 border px-4 py-2 rounded" />
+      </div>
+
+      <!-- Option 2 + Odds 2 -->
+      <div class="flex gap-2">
+        <input type="text" id="popup-option2" placeholder="Option 2" class="w-1/2 border px-4 py-2 rounded" />
+        <input type="text" id="popup-odds2" placeholder="Odds 2" class="w-1/2 border px-4 py-2 rounded" />
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button onclick="closeModal()" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400">Cancel</button>
+        <button id="saveBetBtn" class="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc, arrayUnion
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDooTNeDHoWUU9nLxYxyBIhewydt7Xl_M0",
+      authDomain: "dlstournament-31ac1.firebaseapp.com",
+      projectId: "dlstournament-31ac1",
+      storageBucket: "dlstournament-31ac1.appspot.com",
+      messagingSenderId: "874377019055",
+      appId: "1:874377019055:web:6e38db2ec7f0d541d2de5a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const tasksCol = collection(db, "tasks");
+
+    const matchList = document.getElementById("matchList");
+    let currentTaskId = null;
+
+    const showToast = (msg) => alert(msg);
+
+    onAuthStateChanged(auth, user => {
+      if (!user) return location.href = "login.html";
+      loadTasks();
+    });
+
+    function loadTasks() {
+      onSnapshot(tasksCol, snapshot => {
+        matchList.innerHTML = snapshot.empty
+          ? `<p class="text-center italic text-gray-500">No matches found.</p>` 
+          : "";
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const div = document.createElement("div");
+          div.className = "bg-white rounded-xl shadow-md p-4";
+
+          let betsHTML = "";
+          if (Array.isArray(data.bets) && data.bets.length > 0) {
+            betsHTML = `<div class="mt-4 border-t pt-3">
+              <h4 class="font-semibold text-indigo-600 mb-2">Bets:</h4>
+              <ul class="list-disc list-inside space-y-1">`;
+            data.bets.forEach((bet, idx) => {
+              betsHTML += `
+                <li>
+                  <p><strong>${bet.betTitle}</strong></p>
+                  <p>Option 1: ${bet.option1} (Odds: ${bet.odds1})</p>
+                  <p>Option 2: ${bet.option2} (Odds: ${bet.odds2})</p>
+                </li>`;
+            });
+            betsHTML += `</ul></div>`;
+          }
+
+          div.innerHTML = `
+            <p class="font-bold text-indigo-700">${data.name}</p>
+            <p class="text-sm text-gray-600">${data.description || ""}</p>
+
+            <div class="my-2 flex items-center justify-center gap-2 text-gray-800 font-semibold">
+              <span>${data.reward}</span>
+              <span class="text-red-600 font-bold">VS</span>
+              <span>${data.view || ""}</span>
+            </div>
+
+            ${betsHTML}
+
+            <div class="flex gap-2 mt-4">
+              <button class="bg-blue-600 text-white px-3 py-1 rounded" onclick='openModal("${docSnap.id}")'>Add Bet Info</button>
+              <button class="bg-red-600 text-white px-3 py-1 rounded" onclick='deleteTask("${docSnap.id}")'>Delete</button>
+            </div>
+          `;
+          matchList.appendChild(div);
+        });
+      });
+    }
+
+    window.openModal = (id) => {
+      currentTaskId = id;
+      document.getElementById("betModal").classList.remove("hidden");
+    };
+
+    window.closeModal = () => {
+      document.getElementById("betModal").classList.add("hidden");
+      document.getElementById("popup-betTitle").value = "";
+      document.getElementById("popup-option1").value = "";
+      document.getElementById("popup-option2").value = "";
+      document.getElementById("popup-odds1").value = "";
+      document.getElementById("popup-odds2").value = "";
+    };
+
+    window.deleteTask = async (id) => {
+      try {
+        await deleteDoc(doc(db, "tasks", id));
+        showToast("Deleted");
+      } catch (e) {
+        showToast("Error deleting match");
+        console.error(e);
+      }
+    };
+
+    document.getElementById("saveBetBtn").addEventListener("click", async () => {
+      if (!currentTaskId) return;
+
+      const betData = {
+        betTitle: document.getElementById("popup-betTitle").value.trim(),
+        option1: document.getElementById("popup-option1").value.trim(),
+        option2: document.getElementById("popup-option2").value.trim(),
+        odds1: document.getElementById("popup-odds1").value.trim(),
+        odds2: document.getElementById("popup-odds2").value.trim(),
+      };
+
+      if (!betData.betTitle || !betData.option1 || !betData.option2) {
+        showToast("Please fill at least Bet Title, Option 1 and Option 2");
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, "tasks", currentTaskId), {
+          bets: arrayUnion(betData)
+        });
+        closeModal();
+        showToast("Bet Info Saved");
+      } catch (e) {
+        showToast("Error saving bet info");
+        console.error(e);
+      }
+    });
+  </script>
+</body>
+</html>
