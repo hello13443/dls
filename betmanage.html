@@ -74,7 +74,9 @@
 
     function loadTasks() {
       onSnapshot(tasksCol, snapshot => {
-        matchList.innerHTML = snapshot.empty ? `<p class="text-center italic text-gray-500">No matches found.</p>` : "";
+        matchList.innerHTML = snapshot.empty
+          ? `<p class="text-center italic text-gray-500">No matches found.</p>` 
+          : "";
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           const div = document.createElement("div");
@@ -89,7 +91,7 @@
             <p>Option 2: ${data.option2 || ""} (Odds: ${data.odds2 || "-"})</p>
             <div class="flex gap-2 mt-4">
               <button class="bg-blue-600 text-white px-3 py-1 rounded" onclick='openModal("${docSnap.id}")'>Add Bet Info</button>
-              <button class="bg-red-600 text-white px-3 py-1 rounded" onclick='deleteDoc(doc(db, "tasks", "${docSnap.id}")).then(()=>showToast("Deleted"))'>Delete</button>
+              <button class="bg-red-600 text-white px-3 py-1 rounded" onclick='deleteTask("${docSnap.id}")'>Delete</button>
             </div>
           `;
           matchList.appendChild(div);
@@ -104,6 +106,16 @@
 
     window.closeModal = () => {
       document.getElementById("betModal").classList.add("hidden");
+    };
+
+    window.deleteTask = async (id) => {
+      try {
+        await deleteDoc(doc(db, "tasks", id));
+        showToast("Deleted");
+      } catch (e) {
+        showToast("Error deleting match");
+        console.error(e);
+      }
     };
 
     document.getElementById("saveBetBtn").addEventListener("click", async () => {
