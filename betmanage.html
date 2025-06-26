@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>All Matches</title>
+  <title>Bet Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 </head>
@@ -102,8 +102,13 @@
           div.innerHTML = `
             <p class="font-bold text-indigo-700">${data.name}</p>
             <p class="text-sm text-gray-600">${data.description || ""}</p>
-            <p class="text-gray-700">Team One: ${data.reward}</p>
-            <p>Team Two: ${data.view || ""}</p>
+
+            <!-- Vs Design -->
+            <div class="my-2 flex items-center justify-center gap-2 text-gray-800 font-semibold">
+              <span>${data.reward}</span>
+              <span class="text-red-600 font-bold">VS</span>
+              <span>${data.view || ""}</span>
+            </div>
 
             ${betsHTML}
 
@@ -124,7 +129,6 @@
 
     window.closeModal = () => {
       document.getElementById("betModal").classList.add("hidden");
-      // Clear inputs when closing modal
       document.getElementById("popup-betTitle").value = "";
       document.getElementById("popup-option1").value = "";
       document.getElementById("popup-option2").value = "";
@@ -145,7 +149,6 @@
     document.getElementById("saveBetBtn").addEventListener("click", async () => {
       if (!currentTaskId) return;
 
-      // Collect bet info
       const betData = {
         betTitle: document.getElementById("popup-betTitle").value.trim(),
         option1: document.getElementById("popup-option1").value.trim(),
@@ -154,18 +157,15 @@
         odds2: document.getElementById("popup-odds2").value.trim(),
       };
 
-      // Simple validation
       if (!betData.betTitle || !betData.option1 || !betData.option2) {
         showToast("Please fill at least Bet Title, Option 1 and Option 2");
         return;
       }
 
       try {
-        // Add the new bet to the existing bets array using arrayUnion
         await updateDoc(doc(db, "tasks", currentTaskId), {
           bets: arrayUnion(betData)
         });
-
         closeModal();
         showToast("Bet Info Saved");
       } catch (e) {
